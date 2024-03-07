@@ -331,6 +331,10 @@ def on_store_select(item):
     print("advice after")
     print(myStoreList[targetIndex].tax_saving_advice())
     bottom_table.setItem(0, 0, item_bottom)
+
+    bottom_table.resizeColumnsToContents()
+    bottom_table.resizeRowsToContents()
+
     right_layout.addWidget(bottom_table)
     #for row in range(4):
     #    for column in range(2):
