@@ -481,6 +481,7 @@ if __name__ == "__main__":
         innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         innerFrameList.append(innerFrame)
         center_parent_layout.addWidget(innerFrame)
+        innerFrame.setEnabled(False)
 
     # 가운데 프레임
     center_frame = QFrame()
@@ -501,6 +502,7 @@ if __name__ == "__main__":
     right_frame.setFrameShape(QFrame.StyledPanel)
     right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     right_frame.setLayout(right_parent_layout)
+    right_frame.setEnabled(False)
 
     # 메인 레이아웃에 프레임 추가
     main_layout.addWidget(left_frame)
