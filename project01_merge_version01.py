@@ -269,11 +269,21 @@ class Utilities(Expenses):
 #############################################################################
 
 def on_store_select(item):
-    global center_frame, right_frame
+    global center_frame, right_frame, innerFrameList
     print(storeInfoList[item.row()])
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
-    
+
+    if innerFrameList[targetIndex] != None:
+        for i in range(len(innerFrameList)):
+            if i != targetIndex:
+                innerFrameList[i].hide()
+            else:
+                innerFrameList[i].show()
+    else:
+        print("테이블 만들기 에러")
+        return
+
     # 가운데 프레임에 표 추가
     center_table = QTableWidget()
     print("table initial")
@@ -308,7 +318,7 @@ def on_store_select(item):
     print("layout initial")
     center_layout.addWidget(center_table)
     print("layout add")
-    center_frame.setLayout(center_layout)
+    innerFrameList[targetIndex].setLayout(center_layout)
     print("frame set")
 
     # 오른쪽 프레임 레이아웃
@@ -366,6 +376,7 @@ csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
+innerFrameList = []
 
 if __name__ == "__main__":
     fileCreated = False
@@ -458,10 +469,19 @@ if __name__ == "__main__":
     left_layout.addWidget(left_table)
     left_frame.setLayout(left_layout)
 
+    center_parent_layout = QHBoxLayout()
+    for item in range(6):
+        innerFrame = QFrame()
+        innerFrame.setFrameShape(QFrame.StyledPanel)
+        innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        innerFrameList.append(innerFrame)
+        center_parent_layout.addWidget(innerFrame)
+
     # 가운데 프레임
     center_frame = QFrame()
     center_frame.setFrameShape(QFrame.StyledPanel)
     center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    center_frame.setLayout(center_parent_layout)
 
     # 오른쪽 프레임
     right_frame = QFrame()
