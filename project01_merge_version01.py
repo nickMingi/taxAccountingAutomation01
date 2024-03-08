@@ -37,6 +37,8 @@ class Store():
         self.netProfit = self.totalSales - self.totalCost
         self.setInsurance()
         self.setTax()
+        if self.rentInterest == 0.0:
+            self.ownHome = False
     def setInsurance(self):
         self.pensionIns = PensionIns(self.totalLabor)
         self.healthIns = HealthIns(self.totalLabor)
@@ -46,7 +48,9 @@ class Store():
     def setTax(self):
         self.surTax = SurTax(self.totalSales, self.netProfit)
         self.totalIncomeTax = TotalIncomeTax(self.totalSales, self.netProfit)
+        self.taxPayment = self.totalIncomeTax.calculation()
     def check_consumable_expenses_deduction(self):
+        advice2 = ""
         """
         소모품 구매 비용에 대한 공제 가능 여부를 확인하는 함수
     
@@ -55,11 +59,15 @@ class Store():
         """
         # 공제 가능 여부 확인
         if self.expendables > 0:
-            return "소모품 구매 비용에 대한 공제가 가능합니다."
+            bottom_label2.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            advice2 += "- 소모품 구매 비용에 대한 공제가 가능합니다."
         else:
-            return "소모품 구매 비용이 없거나 음수입니다. \n공제가 불가능합니다."
+            bottom_label2.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            advice2 += "- 소모품 구매 비용이 없거나 음수입니다. \n  공제가 불가능합니다."
+        return advice2
 
     def check_charitable_donation_deduction(self):
+        advice3 = ""
         """
         기부금 공제 가능 여부를 확인하는 함수
     
@@ -70,11 +78,15 @@ class Store():
         # 기부금 공제 가능 여부 확인
         max_deduction_amount = 0.15 * self.netProfit  # 연간 근로소득의 15%까지 공제 가능
         if self.donation <= max_deduction_amount:
-            return "기부금 공제 가능합니다."
+            bottom_label3.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            advice3 += "- 기부금 공제 가능합니다."
         else:
-            return "기부금 공제가 불가능합니다. \n연간 소득 대비 기부금이 너무 많습니다."
+            bottom_label3.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            advice3 += "- 기부금 공제가 불가능합니다. \n  연간 소득 대비 기부금이 너무 많습니다."
+        return advice3
     
     def check_mortgage_interest_deduction(self):
+        advice4 = ""
         """
         주택담보대출 이자 공제 여부를 확인하는 함수
     
@@ -89,11 +101,14 @@ class Store():
         if self.ownHome:
             # 대출 이자 공제 가능 여부 확인
             if self.rentInterest <= max_deduction_amount:
-                return "주택담보대출 이자 공제 가능합니다."
+                bottom_label4.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+                advice4 += "- 주택담보대출 이자 공제 가능합니다."
             else:
-                return "대출 이자 공제가 불가능합니다.\n 최대 이자 공제 가능 금액을 초과했습니다."
+                bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+                advice4 += "- 대출 이자 공제가 불가능합니다.\n  최대 이자 공제 가능 금액을 초과했습니다."
         else:
-            return "주택을 소유하고 있지 않으므로\n 주택담보대출 이자 공제 대상이 아닙니다."
+            return "주택을 소유하고 있지 않으므로\n주택담보대출 이자 공제 대상이 아닙니다."
+        return advice4
 
     def tax_saving_advice(self):
         """
@@ -116,33 +131,23 @@ class Store():
     
         # 비즈니스 비용이 순 이익의 일정 비율 이하일 때
         if self.totalCost < self.netProfit * 0.3:
-            advice += "- 비즈니스 비용을 더 효율적으로\n 관리하여 세금 부담을 줄이세요.\n"
-            advice += "  (예: 사업용 비용을 줄이거나 비즈니스\n 관련 비용을 정확하게 기록하세요)\n"
+            bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            advice += "- 비즈니스 비용을 더 효율적으로\n  관리하여 세금 부담을 줄이세요.\n"
+            advice += "  (예: 사업용 비용을 줄이거나 비즈니스\n  관련 비용을 정확하게 기록하세요)\n"
         else:
+            bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             # 자격 요건에 맞게 비즈니스 비용을 공제하고 세금 혜택을 최대한 활용하는 경우
-            advice += "- 비즈니스 비용을 정확하게 기록하고\n 가능한 모든 공제를 활용하세요.\n"
-            advice += "  (예: 업무 관련 비용, 자격 요건에\n 맞는 공제 항목을 신청하세요)\n"
+            advice += "- 비즈니스 비용을 정확하게 기록하고\n  가능한 모든 공제를 활용하세요.\n"
+            advice += "  (예: 업무 관련 비용, 자격 요건에\n  맞는 공제 항목을 신청하세요)\n"
     
         # 납부할 세금이 있는 경우
-        if self.taxPayment > 0:
-            advice += "- 세무 전문가와 상의하여 가능한\n 세액 공제를 모두 활용하는 것이 좋습니다.\n"
-            advice += "  (예: 세법의 변경사항을 파악하고\n 세액 공제 가능 여부를 확인하세요)\n"
+        if self.taxPayment > 0.0:
+            bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            advice += "- 세무 전문가와 상의하여 가능한\n  세액 공제를 모두 활용하는 것이 좋습니다.\n"
+            advice += "  (예: 세법의 변경사항을 파악하고\n  세액 공제 가능 여부를 확인하세요)"
         else:
-            advice += "- 비즈니스 이익이 없거나 손실인 경우\n 세금 납부가 필요하지 않습니다.\n"
-        print(advice)
-        print("advice before mortgage")
-        
-        # 주택담보대출 이자 공제 여부 확인
-        mortgage_deduction_result = self.check_mortgage_interest_deduction()
-        advice += "- " + mortgage_deduction_result + "\n"
-        print("advice before consumable")
-        # 계산된 소모품 구매 비용에 대한 공제 가능 여부 확인
-        consumable_expenses_deduction_result = self.check_consumable_expenses_deduction()
-        advice += "- " + consumable_expenses_deduction_result + "\n"
-        print("advice before donation")
-        # 계산된 기부금에 대한 공제 가능 여부 확인
-        charitable_donation_deduction_result = self.check_charitable_donation_deduction()
-        advice += "- " + charitable_donation_deduction_result + "\n"
+            bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            advice += "- 비즈니스 이익이 없거나 손실인 경우\n  세금 납부가 필요하지 않습니다."
     
         return advice
     
@@ -269,11 +274,30 @@ class Utilities(Expenses):
 
 #############################################################################
 def on_store_select(item):
-    global center_frame, right_frame
-    print(storeInfoList[item.row()])
+    global center_frame, right_frame, innerFrameList, topInnerFrameList
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
+
+    if innerFrameList[targetIndex] != None:
+        for i in range(len(innerFrameList)):
+            if i != targetIndex:
+                innerFrameList[i].hide()
+            else:
+                innerFrameList[i].show()
+    else:
+        print("테이블 만들기 에러")
+        return
     
+    if topInnerFrameList[targetIndex] != None:
+        for i in range(len(topInnerFrameList)):
+            if i != targetIndex:
+                topInnerFrameList[i].hide()
+            else:
+                topInnerFrameList[i].show()
+    else:
+        print("테이블 만들기 에러")
+        return
+
     # 가운데 프레임에 표 추가
     center_table = QTableWidget()
     print("table initial")
@@ -308,7 +332,7 @@ def on_store_select(item):
     print("layout initial")
     center_layout.addWidget(center_table)
     print("layout add")
-    center_frame.setLayout(center_layout)
+    innerFrameList[targetIndex].setLayout(center_layout)
     print("frame set")
 
     # 오른쪽 프레임 레이아웃
@@ -339,19 +363,31 @@ def on_store_select(item):
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].totalIncomeTax.calculation())))
         top_table.setItem(i, 0, item_top)
     right_layout.addWidget(top_table)
+    topInnerFrameList[targetIndex].setLayout(right_layout)
+
 
     ## 여기에서 어드바이스정보 보여주기
     # 오른쪽 프레임 하단에 표 추가
-    bottom_label = QLabel()
-    bottom_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    bottom_label.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
-    bottom_label.setText(str(myStoreList[targetIndex].tax_saving_advice()))
-    right_layout.addWidget(bottom_label)
-    # for row in range(4):
-    #    for column in range(2):
-    #        item_bottom = QTableWidgetItem(f"Bottom Row {row+1}, Column {column+1}")
-    #        bottom_table.setItem(row, column, item_bottom)
-    # right_layout.addWidget(bottom_table)
+    global bottom_label1, bottom_label2, bottom_label3, bottom_label4
+    bottom_label1 = QLabel()
+    bottom_label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    bottom_label1.setText(str(myStoreList[targetIndex].tax_saving_advice()))
+    right_layout.addWidget(bottom_label1)
+
+    bottom_label2 = QLabel()
+    bottom_label2.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    bottom_label2.setText(str(myStoreList[targetIndex].check_consumable_expenses_deduction()))
+    right_layout.addWidget(bottom_label2)
+
+    bottom_label3 = QLabel()
+    bottom_label3.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    bottom_label3.setText(str(myStoreList[targetIndex].check_charitable_donation_deduction()))
+    right_layout.addWidget(bottom_label3)
+
+    bottom_label4 = QLabel()
+    bottom_label4.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    bottom_label4.setText(str(myStoreList[targetIndex].check_mortgage_interest_deduction()))
+    right_layout.addWidget(bottom_label4)
 
 ## 전역변수
 crawlingList = [
@@ -374,6 +410,8 @@ if not os.path.exists(folder_path) :
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
+innerFrameList = []
+topInnerFrameList = []
 
 if __name__ == "__main__":
     fileCreated = False
@@ -423,18 +461,11 @@ if __name__ == "__main__":
     # 왼쪽 프레임에 표 추가
     storeNameList = []
     myStore = None
-    global storeInfoList
-    storeInfoList = []
     left_table = QTableWidget()
     global myStoreList
     myStoreList = []
     left_table.clicked.connect(on_store_select)
-
-    # button = QPushButton("초기화", window)
-    # button.clicked.connect(button_clicked)
-    # main_layout.addWidget(button)
-
-    left_table.setRowCount(6)
+    left_table.setRowCount(len(crawlingList))
     left_table.setColumnCount(1)
     
     with open(csvName, 'r', encoding='utf-8') as file:
@@ -446,35 +477,45 @@ if __name__ == "__main__":
             myStore.setTax()
             myStoreList.append(myStore)
             storeNameList.append(row[0])
-            rowList = []
-            rowList.append(row[1])
-            rowList.append(row[2])
-            rowList.append(row[3])
-            rowList.append(row[4])
-            rowList.append(row[5])
-            rowList.append(row[6])
-            rowList.append(row[7])
-            rowList.append(row[8])
-            storeInfoList.append(rowList)
     file.close()
     left_table.setVerticalHeaderLabels(storeNameList)
-    for row in range(6):
-        for column in range(6):
+    for row in range(len(crawlingList)):
+        for column in range(len(crawlingList)):
             item = QTableWidgetItem("정보 보기")
             left_table.setItem(row, column, item)
     left_layout = QVBoxLayout()
     left_layout.addWidget(left_table)
     left_frame.setLayout(left_layout)
 
+    center_parent_layout = QHBoxLayout()
+    for item in range(len(crawlingList)):
+        innerFrame = QFrame()
+        innerFrame.setFrameShape(QFrame.StyledPanel)
+        innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        innerFrameList.append(innerFrame)
+        center_parent_layout.addWidget(innerFrame)
+        innerFrame.setEnabled(False)
+
     # 가운데 프레임
     center_frame = QFrame()
     center_frame.setFrameShape(QFrame.StyledPanel)
     center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    center_frame.setLayout(center_parent_layout)
+
+    right_parent_layout = QHBoxLayout()
+    for item in range(len(crawlingList)):
+        topInnerFrame = QFrame()
+        topInnerFrame.setFrameShape(QFrame.StyledPanel)
+        topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        topInnerFrameList.append(topInnerFrame)
+        right_parent_layout.addWidget(topInnerFrame)
 
     # 오른쪽 프레임
     right_frame = QFrame()
     right_frame.setFrameShape(QFrame.StyledPanel)
     right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    right_frame.setLayout(right_parent_layout)
+    right_frame.setEnabled(False)
 
     # 메인 레이아웃에 프레임 추가
     main_layout.addWidget(left_frame)
