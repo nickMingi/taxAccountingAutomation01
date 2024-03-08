@@ -273,7 +273,6 @@ class Utilities(Expenses):
 
 def on_store_select(item):
     global center_frame, right_frame, innerFrameList, topInnerFrameList
-    print(storeInfoList[item.row()])
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
 
@@ -452,14 +451,12 @@ if __name__ == "__main__":
     # 왼쪽 프레임에 표 추가
     storeNameList = []
     myStore = None
-    global storeInfoList
-    storeInfoList = []
     left_table = QTableWidget()
     global myStoreList
     myStoreList = []
     left_table.clicked.connect(on_store_select)
 
-    left_table.setRowCount(6)
+    left_table.setRowCount(len(crawlingList))
     left_table.setColumnCount(1)
     
     with open(csvName, 'r', encoding='utf-8') as file:
@@ -471,20 +468,10 @@ if __name__ == "__main__":
             myStore.setTax()
             myStoreList.append(myStore)
             storeNameList.append(row[0])
-            rowList = []
-            rowList.append(row[1])
-            rowList.append(row[2])
-            rowList.append(row[3])
-            rowList.append(row[4])
-            rowList.append(row[5])
-            rowList.append(row[6])
-            rowList.append(row[7])
-            rowList.append(row[8])
-            storeInfoList.append(rowList)
     file.close()
     left_table.setVerticalHeaderLabels(storeNameList)
-    for row in range(6):
-        for column in range(6):
+    for row in range(len(crawlingList)):
+        for column in range(len(crawlingList)):
             item = QTableWidgetItem("정보 보기")
             left_table.setItem(row, column, item)
     left_layout = QVBoxLayout()
@@ -492,7 +479,7 @@ if __name__ == "__main__":
     left_frame.setLayout(left_layout)
 
     center_parent_layout = QHBoxLayout()
-    for item in range(6):
+    for item in range(len(crawlingList)):
         innerFrame = QFrame()
         innerFrame.setFrameShape(QFrame.StyledPanel)
         innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -507,7 +494,7 @@ if __name__ == "__main__":
     center_frame.setLayout(center_parent_layout)
 
     right_parent_layout = QHBoxLayout()
-    for item in range(6):
+    for item in range(len(crawlingList)):
         topInnerFrame = QFrame()
         topInnerFrame.setFrameShape(QFrame.StyledPanel)
         topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
