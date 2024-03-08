@@ -362,7 +362,7 @@ crawlingList = [
     ["bbq","#comp-j83083i0 > h1","#comp-j83083h8"],
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
-csvName = "C:/Users/user/Desktop/수업/store_info.csv"
+csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
