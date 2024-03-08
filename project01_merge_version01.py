@@ -362,12 +362,13 @@ crawlingList = [
     ["bbq","#comp-j83083i0 > h1","#comp-j83083h8"],
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
-csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
+csvName = "C:/Users/user/Desktop/수업/store_info.csv"
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
 
 if __name__ == "__main__":
+    fileCreated = False
     for storeUrl in crawlingList:
         url = f"https://mingihong.wixsite.com/fiveman/{storeUrl[0]}"
         # print(url)
@@ -389,8 +390,13 @@ if __name__ == "__main__":
         print(name_info, tax_info)
             # 가게 이름과 세금 정보 CSV 파일에 쓰기
         store_infolist = [name_info, tax_info]
-        with open(csvName, 'a', newline = '', encoding = 'utf-8') as csvFp :
-            csvFp.write(' '.join(store_infolist) + '\n')
+        if fileCreated == False:
+            with open(csvName, 'w', newline = '', encoding = 'utf-8') as csvFp :
+                csvFp.write(' '.join(store_infolist) + '\n')
+            fileCreated = True
+        else:
+            with open(csvName, 'a', newline = '', encoding = 'utf-8') as csvFp :
+                csvFp.write(' '.join(store_infolist) + '\n')
 
     app = QApplication(sys.argv)
     window = QWidget()
