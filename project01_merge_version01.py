@@ -36,6 +36,8 @@ class Store():
         self.netProfit = self.totalSales - self.totalCost
         self.setInsurance()
         self.setTax()
+        if self.rentInterest == 0.0:
+            self.ownHome = False
     def setInsurance(self):
         self.pensionIns = PensionIns(self.totalLabor)
         self.healthIns = HealthIns(self.totalLabor)
