@@ -45,6 +45,7 @@ class Store():
     def setTax(self):
         self.surTax = SurTax(self.totalSales, self.netProfit)
         self.totalIncomeTax = TotalIncomeTax(self.totalSales, self.netProfit)
+        self.taxPayment = self.totalIncomeTax.calculation()
     def check_consumable_expenses_deduction(self):
         """
         소모품 구매 비용에 대한 공제 가능 여부를 확인하는 함수
@@ -123,7 +124,7 @@ class Store():
             advice += "  (예: 업무 관련 비용, 자격 요건에\n 맞는 공제 항목을 신청하세요)\n"
     
         # 납부할 세금이 있는 경우
-        if self.taxPayment > 0:
+        if self.taxPayment > 0.0:
             advice += "- 세무 전문가와 상의하여 가능한\n 세액 공제를 모두 활용하는 것이 좋습니다.\n"
             advice += "  (예: 세법의 변경사항을 파악하고\n 세액 공제 가능 여부를 확인하세요)\n"
         else:
@@ -269,7 +270,7 @@ class Utilities(Expenses):
 #############################################################################
 
 def on_store_select(item):
-    global center_frame, right_frame, innerFrameList
+    global center_frame, right_frame, innerFrameList, topInnerFrameList
     print(storeInfoList[item.row()])
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
@@ -280,6 +281,16 @@ def on_store_select(item):
                 innerFrameList[i].hide()
             else:
                 innerFrameList[i].show()
+    else:
+        print("테이블 만들기 에러")
+        return
+    
+    if topInnerFrameList[targetIndex] != None:
+        for i in range(len(topInnerFrameList)):
+            if i != targetIndex:
+                topInnerFrameList[i].hide()
+            else:
+                topInnerFrameList[i].show()
     else:
         print("테이블 만들기 에러")
         return
@@ -349,19 +360,16 @@ def on_store_select(item):
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].totalIncomeTax.calculation())))
         top_table.setItem(i, 0, item_top)
     right_layout.addWidget(top_table)
+    topInnerFrameList[targetIndex].setLayout(right_layout)
+
 
     ## 여기에서 어드바이스정보 보여주기
     # 오른쪽 프레임 하단에 표 추가
     bottom_label = QLabel()
     bottom_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     bottom_label.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
-    bottom_label.setText(str(myStoreList[targetIndex].tax_saving_advice()))
+    bottom_label.setText(str(myStoreList[targetIndex].tax_saving_advice())+str(targetIndex))
     right_layout.addWidget(bottom_label)
-    #for row in range(4):
-    #    for column in range(2):
-    #        item_bottom = QTableWidgetItem(f"Bottom Row {row+1}, Column {column+1}")
-    #        bottom_table.setItem(row, column, item_bottom)
-    #right_layout.addWidget(bottom_table)
 
 ## 전역변수
 crawlingList = [
@@ -377,6 +385,7 @@ storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
 innerFrameList = []
+topInnerFrameList = []
 
 if __name__ == "__main__":
     fileCreated = False
@@ -433,10 +442,6 @@ if __name__ == "__main__":
     myStoreList = []
     left_table.clicked.connect(on_store_select)
 
-#    button = QPushButton("초기화", window)
-#    button.clicked.connect(button_clicked)
-#    main_layout.addWidget(button)
-
     left_table.setRowCount(6)
     left_table.setColumnCount(1)
     
@@ -483,10 +488,19 @@ if __name__ == "__main__":
     center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     center_frame.setLayout(center_parent_layout)
 
+    right_parent_layout = QHBoxLayout()
+    for item in range(6):
+        topInnerFrame = QFrame()
+        topInnerFrame.setFrameShape(QFrame.StyledPanel)
+        topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        topInnerFrameList.append(topInnerFrame)
+        right_parent_layout.addWidget(topInnerFrame)
+
     # 오른쪽 프레임
     right_frame = QFrame()
     right_frame.setFrameShape(QFrame.StyledPanel)
     right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    right_frame.setLayout(right_parent_layout)
 
     # 메인 레이아웃에 프레임 추가
     main_layout.addWidget(left_frame)
