@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QLineEdit
 from bs4 import BeautifulSoup
 import urllib.request
 import datetime
@@ -7,6 +7,7 @@ import requests
 import time
 import csv
 import re
+import os
 
 # 테스트
 #####################################################################################################################
@@ -272,7 +273,6 @@ class Utilities(Expenses):
 #############################################################################
 
 #############################################################################
-
 def on_store_select(item):
     global center_frame, right_frame, innerFrameList, topInnerFrameList
     targetIndex = item.row()
@@ -399,6 +399,14 @@ crawlingList = [
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
+
+# 파일 경로에서 폴더 경로 추출
+folder_path = os.path.dirname(csvName)
+
+# 폴더가 존재하지 않으면 생성
+if not os.path.exists(folder_path) :
+    os.makedirs(folder_path)
+
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
@@ -457,7 +465,6 @@ if __name__ == "__main__":
     global myStoreList
     myStoreList = []
     left_table.clicked.connect(on_store_select)
-
     left_table.setRowCount(len(crawlingList))
     left_table.setColumnCount(1)
     
