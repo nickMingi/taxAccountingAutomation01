@@ -332,6 +332,7 @@ def on_store_select(item):
     print(myStoreList[targetIndex].tax_saving_advice())
     bottom_table.setItem(0, 0, item_bottom)
 
+    #글 크기에 맞춰서 테이블 resize
     bottom_table.resizeColumnsToContents()
     bottom_table.resizeRowsToContents()
 
