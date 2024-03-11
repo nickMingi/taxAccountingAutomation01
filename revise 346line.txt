@@ -1,0 +1,29 @@
+            selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
+            value = comList[selected_row][j]
+            j+=1
+            center_table.setItem(j-2,1,QTableWidgetItem(str(value)))
+
+        for m in range(8): 
+            firstItem = center_table.item(m, 0).text()
+            firstValue = int(firstItem)
+            secondItem = center_table.item(m, 1).text()
+            secondValue = int(secondItem)
+
+            try :
+                percentValue = (firstValue-secondValue)/firstValue*100
+                rounded_percentValue = round(percentValue, 2)
+                rpv = rounded_percentValue
+                if rpv > 0 :
+                    rpv = "+" + str(rpv) + "%"
+                elif rpv < 0 :
+                    rpv = str(rpv) + '%'
+            except :
+                rpv = 0
+
+            item = QTableWidgetItem(str(rpv))
+            if rounded_percentValue > 0:
+                item.setForeground(QColor('red'))  # 글자색을 빨간색으로 설정
+            elif rounded_percentValue < 0:
+                item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
+
+            center_table.setItem(m, 2, item)

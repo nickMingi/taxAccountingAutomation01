@@ -10,6 +10,7 @@ import time
 import csv
 import re
 import os
+from PyQt5.QtGui import QColor
 
 # 테스트
 #####################################################################################################################
@@ -306,31 +307,69 @@ def on_store_select(item):
     print("table initial")
     center_table.setRowCount(8)
     print("table set row count")
-    center_table.setColumnCount(1)
+    center_table.setColumnCount(3)
     print("table set column count")
     #["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
     center_table.setVerticalHeaderLabels(storeInfoHeaderList)
     print("table set headers")
-    for i in range(8):
-        if i == 0:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].totalSales))
-        elif i == 1:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].ingredients))
-        elif i == 2:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].totalLabor))
-        elif i == 3:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].expendables))
-        elif i == 4:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].rentInterest))
-        elif i == 5:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].rentFee))
-        elif i == 6:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].utilities))
-        elif i == 7:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
-        
-        center_table.setItem(i, 0, item)
-        
+    
+    with open(r'C:\Projects\Project1_WorkAutomation\result\store_info_2022.csv', 'r', encoding='utf-8') as file:
+        inFile = csv.reader(file)
+        comList = list(inFile)
+
+        for i in range(8):
+            if i == 0:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].totalSales))
+            elif i == 1:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].ingredients))
+            elif i == 2:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].totalLabor))
+            elif i == 3:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].expendables))
+            elif i == 4:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].rentInterest))
+            elif i == 5:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].rentFee))
+            elif i == 6:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].utilities))
+            elif i == 7:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
+            
+            center_table.setItem(i, 0, item)
+  
+            for j in range(1,9) :
+                selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
+                value = comList[selected_row][j]
+                center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
+
+        for m in range(8): 
+            firstItem = center_table.item(m, 0).text()
+            firstValue = int(firstItem)
+            secondItem = center_table.item(m, 1).text()
+            secondValue = int(secondItem)
+
+            try :
+                percentValue = (firstValue-secondValue)/firstValue*100
+                rounded_percentValue = round(percentValue, 2)
+                rpv = rounded_percentValue
+                if rpv > 0 :
+                    rpv = "+" + str(rpv) + "%"
+                elif rpv < 0 :
+                    rpv = str(rpv) + '%'
+            except :
+                rpv = 0
+
+            item = QTableWidgetItem(str(rpv))
+            if rounded_percentValue > 0:
+                item.setForeground(QColor('red'))  # 글자색을 빨간색으로 설정
+            elif rounded_percentValue < 0:
+                item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
+
+            center_table.setItem(m, 2, item)
+
+
+
+
     center_layout = QVBoxLayout()
     print("layout initial")
     center_layout.addWidget(center_table)
