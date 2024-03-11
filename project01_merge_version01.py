@@ -2,6 +2,10 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QMenuBar, QAction, QStackedWidget, QMainWindow, QMenu
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from bs4 import BeautifulSoup
 import urllib.request
 import datetime
@@ -10,6 +14,7 @@ import time
 import csv
 import re
 import os
+from PyQt5.QtGui import QColor
 
 # 테스트
 #####################################################################################################################
@@ -274,7 +279,50 @@ class Utilities(Expenses):
     
 
 #############################################################################
+def save_to_pdf():
+    # PDF 생성
+    c = canvas.Canvas("store_info.pdf", pagesize=letter)
 
+    pdfmetrics.registerFont(TTFont("맑은고딕", "malgun.ttf"))
+    c.setFont("맑은고딕", 16)
+
+    # 선택된 가게 정보 가져오기
+    selected_store_index = left_table.currentRow()
+    selected_store = myStoreList[selected_store_index]
+
+    # PDF에 가게 정보 추가
+    c.drawString(100, 750, "가게 정보")
+    c.drawString(100, 730, f"가게명: {selected_store.name}")
+    c.drawString(100, 710, f"총 매출: {selected_store.totalSales}")
+    c.drawString(100, 690, f"재료비: {selected_store.ingredients}")
+    c.drawString(100, 670, f"인건비: {selected_store.totalLabor}")
+    c.drawString(100, 650, f"소모품: {selected_store.expendables}")
+    c.drawString(100, 630, f"주담대: {selected_store.rentInterest}")
+    c.drawString(100, 610, f"임차료: {selected_store.rentFee}")
+    c.drawString(100, 590, f"공과금: {selected_store.utilities}")
+    c.drawString(100, 570, f"기부금: {selected_store.donation}")
+
+    # PDF에 계산된 세금 정보 추가
+    c.drawString(100, 530, "계산된 세금 정보")
+    c.drawString(100, 510, f"국민연금: {selected_store.pensionIns.calculation()}")
+    c.drawString(100, 490, f"건강보험: {selected_store.healthIns.calculation()}")
+    c.drawString(100, 470, f"장기요양보험: {selected_store.convalscenceIns.calculation()}")
+    c.drawString(100, 450, f"고용보험: {selected_store.employmentIns.calculation()}")
+    c.drawString(100, 430, f"산재보험: {selected_store.occupationalIns.calculation()}")
+    c.drawString(100, 410, f"부가가치세: {selected_store.surTax.calculation()}")
+    c.drawString(100, 390, f"종합소득세: {selected_store.totalIncomeTax.calculation()}")
+
+    # PDF에 어드바이스 정보 추가
+    c.drawString(100, 350, "")
+    advice = selected_store.tax_saving_advice()
+    advice_lines = advice.split("\n")
+    y_position = 350
+    for line in advice_lines:
+        c.drawString(100, y_position, line)
+        y_position -= 20
+
+    # PDF 저장
+    c.save()
 #############################################################################
 def on_store_select(item):
     global annual_center_frame, annual_right_frame, annual_innerFrameList, annual_topInnerFrameList
@@ -306,32 +354,69 @@ def on_store_select(item):
     print("table initial")
     annual_center_table.setRowCount(8)
     print("table set row count")
-    annual_center_table.setColumnCount(1)
+    annual_center_table.setColumnCount(3)
     print("table set column count")
     #["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
     annual_center_table.setVerticalHeaderLabels(storeInfoHeaderList)
     print("table set headers")
-    for i in range(8):
-        if i == 0:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].totalSales))
-        elif i == 1:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].ingredients))
-        elif i == 2:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].totalLabor))
-        elif i == 3:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].expendables))
-        elif i == 4:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].rentInterest))
-        elif i == 5:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].rentFee))
-        elif i == 6:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].utilities))
-        elif i == 7:
-            item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
-        
-        annual_center_table.setItem(i, 0, item)
+    
+    with open(r'./store_info_2022.csv', 'r', encoding='utf-8') as file:
+        inFile = csv.reader(file)
+        comList = list(inFile)
 
-    # 가운데 프레임 레이아웃        
+        for i in range(8):
+            if i == 0:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].totalSales))
+            elif i == 1:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].ingredients))
+            elif i == 2:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].totalLabor))
+            elif i == 3:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].expendables))
+            elif i == 4:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].rentInterest))
+            elif i == 5:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].rentFee))
+            elif i == 6:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].utilities))
+            elif i == 7:
+                item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
+            
+            center_table.setItem(i, 0, item)
+  
+            for j in range(1,9) :
+                selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
+                value = comList[selected_row][j]
+                center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
+
+        for m in range(8): 
+            firstItem = center_table.item(m, 0).text()
+            firstValue = int(firstItem)
+            secondItem = center_table.item(m, 1).text()
+            secondValue = int(secondItem)
+
+            try :
+                percentValue = (firstValue-secondValue)/firstValue*100
+                rounded_percentValue = round(percentValue, 2)
+                rpv = rounded_percentValue
+                if rpv > 0 :
+                    rpv = "+" + str(rpv) + "%"
+                elif rpv < 0 :
+                    rpv = str(rpv) + '%'
+            except :
+                rpv = 0
+
+            item = QTableWidgetItem(str(rpv))
+            if rounded_percentValue > 0:
+                item.setForeground(QColor('red'))  # 글자색을 빨간색으로 설정
+            elif rounded_percentValue < 0:
+                item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
+
+            center_table.setItem(m, 2, item)
+
+
+
+
     annual_center_layout = QVBoxLayout()
     print("layout initial")
     annual_center_layout.addWidget(annual_center_table)
@@ -400,6 +485,7 @@ def on_store_select(item):
 
     annual_button_btn = QPushButton("PDF로 저장")
     annual_button_btn.setEnabled(True)
+    annual_button_btn.clicked.connect(save_to_pdf)
     annual_right_layout.addWidget(annual_button_btn)
 
 ## 전역변수
@@ -500,7 +586,7 @@ if __name__ == "__main__":
     left_layout.addWidget(left_table)
 
     pixmap_list = []
-    image_paths = ['taxAccountingAutomation01/advertisement/adv1.jpg', 'taxAccountingAutomation01/advertisement/adv2.jpg', 'taxAccountingAutomation01/advertisement/adv3.jpg']
+    image_paths = ['./advertisement/adv1.jpg', './advertisement/adv2.jpg', './advertisement/adv3.jpg']
     
     for path in image_paths:
         pixmap = QPixmap(path)
