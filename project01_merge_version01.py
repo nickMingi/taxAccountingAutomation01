@@ -500,7 +500,7 @@ if __name__ == "__main__":
     left_layout.addWidget(left_table)
 
     pixmap_list = []
-    image_paths = ['C:/Users/user/Desktop/advertisement/adv1.jpg', 'C:/Users/user/Desktop/advertisement/adv2.jpg', 'C:/Users/user/Desktop/advertisement/adv3.jpg']
+    image_paths = ['taxAccountingAutomation01/advertisement/adv1.jpg', 'taxAccountingAutomation01/advertisement/adv2.jpg', 'taxAccountingAutomation01/advertisement/adv3.jpg']
     
     for path in image_paths:
         pixmap = QPixmap(path)
