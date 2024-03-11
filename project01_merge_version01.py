@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QPixmap
 from bs4 import BeautifulSoup
 import urllib.request
 import datetime
@@ -7,6 +9,7 @@ import requests
 import time
 import csv
 import re
+import os
 
 # 테스트
 #####################################################################################################################
@@ -106,7 +109,8 @@ class Store():
                 bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
                 advice4 += "- 대출 이자 공제가 불가능합니다.\n  최대 이자 공제 가능 금액을 초과했습니다."
         else:
-            return "주택을 소유하고 있지 않으므로\n주택담보대출 이자 공제 대상이 아닙니다."
+            bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            return "- 주택을 소유하고 있지 않으므로\n  주택담보대출 이자 공제 대상이 아닙니다."
         return advice4
 
     def tax_saving_advice(self):
@@ -272,7 +276,6 @@ class Utilities(Expenses):
 #############################################################################
 
 #############################################################################
-
 def on_store_select(item):
     global center_frame, right_frame, innerFrameList, topInnerFrameList
     targetIndex = item.row()
@@ -362,32 +365,41 @@ def on_store_select(item):
         elif i == 6:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].totalIncomeTax.calculation())))
         top_table.setItem(i, 0, item_top)
+    top_table.setEnabled(False)
     right_layout.addWidget(top_table)
     topInnerFrameList[targetIndex].setLayout(right_layout)
 
 
     ## 여기에서 어드바이스정보 보여주기
     # 오른쪽 프레임 하단에 표 추가
-    global bottom_label1, bottom_label2, bottom_label3, bottom_label4
+    global bottom_label1, bottom_label2, bottom_label3, bottom_label4, button_btn
     bottom_label1 = QLabel()
     bottom_label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label1.setText(str(myStoreList[targetIndex].tax_saving_advice()))
+    bottom_label1.setEnabled(False)
     right_layout.addWidget(bottom_label1)
 
     bottom_label2 = QLabel()
     bottom_label2.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label2.setText(str(myStoreList[targetIndex].check_consumable_expenses_deduction()))
+    bottom_label2.setEnabled(False)
     right_layout.addWidget(bottom_label2)
 
     bottom_label3 = QLabel()
     bottom_label3.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label3.setText(str(myStoreList[targetIndex].check_charitable_donation_deduction()))
+    bottom_label3.setEnabled(False)
     right_layout.addWidget(bottom_label3)
 
     bottom_label4 = QLabel()
     bottom_label4.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label4.setText(str(myStoreList[targetIndex].check_mortgage_interest_deduction()))
+    bottom_label4.setEnabled(False)
     right_layout.addWidget(bottom_label4)
+
+    button_btn = QPushButton("PDF로 저장")
+    button_btn.setEnabled(True)
+    right_layout.addWidget(button_btn)
 
 ## 전역변수
 crawlingList = [
@@ -399,6 +411,14 @@ crawlingList = [
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
+
+# 파일 경로에서 폴더 경로 추출
+folder_path = os.path.dirname(csvName)
+
+# 폴더가 존재하지 않으면 생성
+if not os.path.exists(folder_path) :
+    os.makedirs(folder_path)
+
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
@@ -457,7 +477,6 @@ if __name__ == "__main__":
     global myStoreList
     myStoreList = []
     left_table.clicked.connect(on_store_select)
-
     left_table.setRowCount(len(crawlingList))
     left_table.setColumnCount(1)
     
@@ -476,9 +495,37 @@ if __name__ == "__main__":
         for column in range(len(crawlingList)):
             item = QTableWidgetItem("정보 보기")
             left_table.setItem(row, column, item)
+    
     left_layout = QVBoxLayout()
     left_layout.addWidget(left_table)
+
+    pixmap_list = []
+    image_paths = ['./advertisement/adv1.jpg', './advertisement/adv2.jpg', './advertisement/adv3.jpg']
+    
+    for path in image_paths:
+        pixmap = QPixmap(path)
+        pixmap_list.append(pixmap)
+
+    left_bottom_label = QLabel()
+    timer = QTimer(left_bottom_label)
+    left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    left_bottom_label.setPixmap(pixmap_list[0])
+    timer.setInterval(5000)
+    timer.setSingleShot(False)  # 단일 실행 모드 해제
+
+    current_index = 0
+    def change_image():
+        global current_index
+        next_index = (current_index + 1) % len(pixmap_list)
+        left_bottom_label.setPixmap(pixmap_list[next_index])
+        current_index = next_index
+
+    timer.timeout.connect(change_image)
+    timer.start()
+
+    left_layout.addWidget(left_bottom_label)
     left_frame.setLayout(left_layout)
+    
 
     center_parent_layout = QHBoxLayout()
     for item in range(len(crawlingList)):
@@ -508,12 +555,13 @@ if __name__ == "__main__":
     right_frame.setFrameShape(QFrame.StyledPanel)
     right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     right_frame.setLayout(right_parent_layout)
-    right_frame.setEnabled(False)
+
 
     # 메인 레이아웃에 프레임 추가
     main_layout.addWidget(left_frame)
     main_layout.addWidget(center_frame)
     main_layout.addWidget(right_frame)
 
+    app.aboutToQuit.connect(timer.stop)
     window.show()
     sys.exit(app.exec_())
