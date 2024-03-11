@@ -1,6 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QProgressBar
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QPixmap
 from bs4 import BeautifulSoup
 import urllib.request
@@ -11,6 +12,10 @@ import csv
 import re
 import os
 from PyQt5.QtGui import QColor
+import tkinter as tk
+from tkinter import ttk, messagebox
+import tkinter.font as font
+from tqdm import tqdm
 
 # 테스트
 #####################################################################################################################
@@ -273,6 +278,7 @@ class Utilities(Expenses):
         self.totalCost += self.utilities
         return self.totalCost
     
+    
 
 #############################################################################
 
@@ -464,143 +470,211 @@ center_frame, right_frame = None, None
 innerFrameList = []
 topInnerFrameList = []
 
-if __name__ == "__main__":
-    fileCreated = False
-    for storeUrl in crawlingList:
-        url = f"https://mingihong.wixsite.com/fiveman/{storeUrl[0]}"
-        # print(url)
-        htmlObeject = urllib.request.urlopen(url)
-        ## 유알엘을 리퀘스트
-        webPage = htmlObeject.read()
-        bsObject = BeautifulSoup(webPage, 'html.parser')
-            ## html 파일을 받음 
-            ## beautifulsoup 사용 
-        store_name = storeUrl[1].split(' > ')[0].replace('#', '')
-        name_info = bsObject.find('div', {'id': store_name}).text.strip()
-            ## 제목받아오기 storeUrl 안에 있음 soup.select_one("변수")
-        tax = storeUrl[2].split(' > ')[0].replace('#', '')
-        tax_info = bsObject.find('div', {'id': tax}).text.strip()
-        # 세금 항목 숫자만 표시되게 하기
-        tax_info = re.sub(r'\D', ',', tax_info)
-        # 항목 구분 쉼표 한번만 나오게 하기
-        tax_info = re.sub(r',+', ',', tax_info)
-        print(name_info, tax_info)
-            # 가게 이름과 세금 정보 CSV 파일에 쓰기
-        store_infolist = [name_info, tax_info]
-        if fileCreated == False:
-            with open(csvName, 'w', newline = '', encoding = 'utf-8') as csvFp :
-                csvFp.write(' '.join(store_infolist) + '\n')
-            fileCreated = True
-        else:
-            with open(csvName, 'a', newline = '', encoding = 'utf-8') as csvFp :
-                csvFp.write(' '.join(store_infolist) + '\n')
+############################################################################## 로그인 기능
+root = tk.Tk()
+root.title("로그인 창")
+root.geometry("260x130")  # 창 크기 조정
+root.resizable(False, False)  # 창 크기 고정
 
-    app = QApplication(sys.argv)
-    window = QWidget()
-    window.setWindowTitle("세무/회계 자동화 프로그램")
-    window.resize(1200, 900)
+current_index = 0 # 사진 초기 값
 
-    # 메인 레이아웃
-    main_layout = QHBoxLayout()
-    window.setLayout(main_layout)
+def login():
+    # 입력한 아이디와 비밀번호 가져오기
+    entered_id = id_entry.get()
+    entered_password = password_entry.get()
 
-    # 왼쪽 프레임
-    left_frame = QFrame()
-    left_frame.setFrameShape(QFrame.StyledPanel)
-    left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    # 아이디와 비밀번호 확인
+    if entered_id == "a" and entered_password == "1":  ########################### 아이디 a / 비밀번호 1 (관리자 아이디 >> 모든 정보 열람 가능)
+        global window
+        # 로그인 성공 메시지 표시
+        messagebox.showinfo("로그인 성공", "로그인에 성공했습니다.")
+        # 로그인 창 닫기
+        root.destroy()
+        # 새창열기
+        if __name__ == "__main__":
+            fileCreated = False            
+            for storeUrl in crawlingList:
+                url = f"https://mingihong.wixsite.com/fiveman/{storeUrl[0]}"
+                # print(url)
+                htmlObeject = urllib.request.urlopen(url)
+                ## 유알엘을 리퀘스트
+                webPage = htmlObeject.read()
+                bsObject = BeautifulSoup(webPage, 'html.parser')
+                    ## html 파일을 받음 
+                    ## beautifulsoup 사용 
+                store_name = storeUrl[1].split(' > ')[0].replace('#', '')
+                name_info = bsObject.find('div', {'id': store_name}).text.strip()
+                    ## 제목받아오기 storeUrl 안에 있음 soup.select_one("변수")
+                tax = storeUrl[2].split(' > ')[0].replace('#', '')
+                tax_info = bsObject.find('div', {'id': tax}).text.strip()
+                # 세금 항목 숫자만 표시되게 하기
+                tax_info = re.sub(r'\D', ',', tax_info)
+                # 항목 구분 쉼표 한번만 나오게 하기
+                tax_info = re.sub(r',+', ',', tax_info)
+                print(name_info, tax_info)
+                    # 가게 이름과 세금 정보 CSV 파일에 쓰기
+                store_infolist = [name_info, tax_info]
 
-    # 왼쪽 프레임에 표 추가
-    storeNameList = []
-    myStore = None
-    left_table = QTableWidget()
-    global myStoreList
-    myStoreList = []
-    left_table.clicked.connect(on_store_select)
-    left_table.setRowCount(len(crawlingList))
-    left_table.setColumnCount(1)
-    
-    with open(csvName, 'r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            tempList = [row[0],int(row[1]),int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7]),int(row[8])]
-            myStore = Store(tempList)
-            myStore.setInsurance()
-            myStore.setTax()
-            myStoreList.append(myStore)
-            storeNameList.append(row[0])
-    file.close()
-    left_table.setVerticalHeaderLabels(storeNameList)
-    for row in range(len(crawlingList)):
-        for column in range(len(crawlingList)):
-            item = QTableWidgetItem("정보 보기")
-            left_table.setItem(row, column, item)
-    
-    left_layout = QVBoxLayout()
-    left_layout.addWidget(left_table)
+                ########################## 파이썬 터미널 프로그래스 바 ###########
+                pbar = tqdm(store_infolist)
+                for n in pbar :
+                    time.sleep(0.1)
 
-    pixmap_list = []
-    image_paths = ['./advertisement/adv1.jpg', './advertisement/adv2.jpg', './advertisement/adv3.jpg']
-    
-    for path in image_paths:
-        pixmap = QPixmap(path)
-        pixmap_list.append(pixmap)
+                if fileCreated == False:
+                    with open(csvName, 'w', newline = '', encoding = 'utf-8') as csvFp :
+                        csvFp.write(' '.join(store_infolist) + '\n')
+                    fileCreated = True
+                else:
+                    with open(csvName, 'a', newline = '', encoding = 'utf-8') as csvFp :
+                        csvFp.write(' '.join(store_infolist) + '\n')
 
-    left_bottom_label = QLabel()
-    timer = QTimer(left_bottom_label)
-    left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    left_bottom_label.setPixmap(pixmap_list[0])
-    timer.setInterval(5000)
-    timer.setSingleShot(False)  # 단일 실행 모드 해제
+            app = QApplication(sys.argv)
+            window = QWidget()
+            window.setWindowTitle("세무/회계 자동화 프로그램")
+            window.resize(1200, 900)
 
-    current_index = 0
-    def change_image():
-        global current_index
-        next_index = (current_index + 1) % len(pixmap_list)
-        left_bottom_label.setPixmap(pixmap_list[next_index])
-        current_index = next_index
+            # 메인 레이아웃
+            main_layout = QHBoxLayout()
+            window.setLayout(main_layout)
 
-    timer.timeout.connect(change_image)
-    timer.start()
+            # 왼쪽 프레임
+            left_frame = QFrame()
+            left_frame.setFrameShape(QFrame.StyledPanel)
+            left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-    left_layout.addWidget(left_bottom_label)
-    left_frame.setLayout(left_layout)
-    
+            # 왼쪽 프레임에 표 추가
+            storeNameList = []
+            myStore = None
+            global left_table
+            left_table = QTableWidget()
+            global myStoreList
+            myStoreList = []
+            left_table.clicked.connect(on_store_select)
+            left_table.setRowCount(len(crawlingList))
+            left_table.setColumnCount(1)
+            
+            with open(csvName, 'r', encoding='utf-8') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    tempList = [row[0],int(row[1]),int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7]),int(row[8])]
+                    myStore = Store(tempList)
+                    myStore.setInsurance()
+                    myStore.setTax()
+                    myStoreList.append(myStore)
+                    storeNameList.append(row[0])
+            file.close()
+            left_table.setVerticalHeaderLabels(storeNameList)
+            for row in range(len(crawlingList)):
+                for column in range(len(crawlingList)):
+                    item = QTableWidgetItem("정보 보기")
+                    left_table.setItem(row, column, item)
+            
+            left_layout = QVBoxLayout()
+            left_layout.addWidget(left_table)
 
-    center_parent_layout = QHBoxLayout()
-    for item in range(len(crawlingList)):
-        innerFrame = QFrame()
-        innerFrame.setFrameShape(QFrame.StyledPanel)
-        innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        innerFrameList.append(innerFrame)
-        center_parent_layout.addWidget(innerFrame)
-        innerFrame.setEnabled(False)
+            pixmap_list = []
+            image_paths = ['./advertisement/adv1.jpg', './advertisement/adv2.jpg', './advertisement/adv3.jpg']
+            
+            for path in image_paths:
+                pixmap = QPixmap(path)
+                pixmap_list.append(pixmap)
 
-    # 가운데 프레임
-    center_frame = QFrame()
-    center_frame.setFrameShape(QFrame.StyledPanel)
-    center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    center_frame.setLayout(center_parent_layout)
-
-    right_parent_layout = QHBoxLayout()
-    for item in range(len(crawlingList)):
-        topInnerFrame = QFrame()
-        topInnerFrame.setFrameShape(QFrame.StyledPanel)
-        topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        topInnerFrameList.append(topInnerFrame)
-        right_parent_layout.addWidget(topInnerFrame)
-
-    # 오른쪽 프레임
-    right_frame = QFrame()
-    right_frame.setFrameShape(QFrame.StyledPanel)
-    right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    right_frame.setLayout(right_parent_layout)
+            left_bottom_label = QLabel()
+            timer = QTimer(left_bottom_label)
+            left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            left_bottom_label.setPixmap(pixmap_list[0])
+            timer.setInterval(5000)
+            timer.setSingleShot(False)  # 단일 실행 모드 해제
 
 
-    # 메인 레이아웃에 프레임 추가
-    main_layout.addWidget(left_frame)
-    main_layout.addWidget(center_frame)
-    main_layout.addWidget(right_frame)
+            def change_image():
+                global current_index
+                next_index = (current_index + 1) % len(pixmap_list)
+                left_bottom_label.setPixmap(pixmap_list[next_index])
+                current_index = next_index
 
-    app.aboutToQuit.connect(timer.stop)
-    window.show()
-    sys.exit(app.exec_())
+            timer.timeout.connect(change_image)
+            timer.start()
+
+            left_layout.addWidget(left_bottom_label)
+            left_frame.setLayout(left_layout)
+            
+
+            center_parent_layout = QHBoxLayout()
+            for item in range(len(crawlingList)):
+                innerFrame = QFrame()
+                innerFrame.setFrameShape(QFrame.StyledPanel)
+                innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                innerFrameList.append(innerFrame)
+                center_parent_layout.addWidget(innerFrame)
+                innerFrame.setEnabled(False)
+
+            # 가운데 프레임
+            center_frame = QFrame()
+            center_frame.setFrameShape(QFrame.StyledPanel)
+            center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            center_frame.setLayout(center_parent_layout)
+
+            right_parent_layout = QHBoxLayout()
+            for item in range(len(crawlingList)):
+                topInnerFrame = QFrame()
+                topInnerFrame.setFrameShape(QFrame.StyledPanel)
+                topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                topInnerFrameList.append(topInnerFrame)
+                right_parent_layout.addWidget(topInnerFrame)
+
+            # 오른쪽 프레임
+            global right_frame
+            right_frame = QFrame()
+            right_frame.setFrameShape(QFrame.StyledPanel)
+            right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            right_frame.setLayout(right_parent_layout)
+
+
+            # 메인 레이아웃에 프레임 추가
+            main_layout.addWidget(left_frame)
+            main_layout.addWidget(center_frame)
+            main_layout.addWidget(right_frame)
+
+            app.aboutToQuit.connect(timer.stop)
+            window.show()
+            sys.exit(app.exec_())
+
+
+
+    else:
+        # 로그인 실패 메시지 표시
+        messagebox.showerror("로그인 실패", "아이디 또는 비밀번호가 올바르지 않습니다.")
+        # 비밀번호 틀린 횟수 체크
+        check_password_attempts()
+
+
+# 비밀번호 틀린 횟수 체크 함수
+def check_password_attempts():
+    global password_attempts
+    password_attempts += 1
+    if password_attempts >= 5:
+        messagebox.showerror("비밀번호 오류", "비밀번호를 5번 틀렸습니다. 프로그램을 종료합니다.")
+        root.destroy()
+
+# 아이디 입력 레이블 및 엔트리
+id_label = ttk.Label(root, text="아이디:")
+id_label.pack()
+id_entry = ttk.Entry(root)
+id_entry.pack()
+
+# 비밀번호 입력 레이블 및 엔트리
+password_label = ttk.Label(root, text="비밀번호:")
+password_label.pack()
+password_entry = ttk.Entry(root, show="*")  # 비밀번호 입력 시 *로 표시
+password_entry.pack()
+
+# 로그인 버튼
+login_button = ttk.Button(root, text="로그인", command=login)
+login_button.pack()
+
+# 비밀번호 틀린 횟수 초기화
+password_attempts = 0
+
+
+root.mainloop()
