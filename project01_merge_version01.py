@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QPixmap
 from bs4 import BeautifulSoup
 import urllib.request
 import datetime
@@ -487,9 +489,37 @@ if __name__ == "__main__":
         for column in range(6):
             item = QTableWidgetItem("정보 보기")
             left_table.setItem(row, column, item)
+    
     left_layout = QVBoxLayout()
     left_layout.addWidget(left_table)
+
+    pixmap_list = []
+    image_paths = ['C:/Users/user/Desktop/advertisement/adv1.jpg', 'C:/Users/user/Desktop/advertisement/adv2.jpg', 'C:/Users/user/Desktop/advertisement/adv3.jpg']
+    
+    for path in image_paths:
+        pixmap = QPixmap(path)
+        pixmap_list.append(pixmap)
+
+    left_bottom_label = QLabel()
+    timer = QTimer(left_bottom_label)
+    left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    left_bottom_label.setPixmap(pixmap_list[0])
+    timer.setInterval(5000)
+    timer.setSingleShot(False)  # 단일 실행 모드 해제
+
+    current_index = 0
+    def change_image():
+        global current_index
+        next_index = (current_index + 1) % len(pixmap_list)
+        left_bottom_label.setPixmap(pixmap_list[next_index])
+        current_index = next_index
+
+    timer.timeout.connect(change_image)
+    timer.start()
+
+    left_layout.addWidget(left_bottom_label)
     left_frame.setLayout(left_layout)
+    
 
     center_parent_layout = QHBoxLayout()
     for item in range(6):
@@ -526,5 +556,6 @@ if __name__ == "__main__":
     main_layout.addWidget(center_frame)
     main_layout.addWidget(right_frame)
 
+    app.aboutToQuit.connect(timer.stop)
     window.show()
     sys.exit(app.exec_())
