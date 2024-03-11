@@ -109,7 +109,8 @@ class Store():
                 bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
                 advice4 += "- 대출 이자 공제가 불가능합니다.\n  최대 이자 공제 가능 금액을 초과했습니다."
         else:
-            return "주택을 소유하고 있지 않으므로\n주택담보대출 이자 공제 대상이 아닙니다."
+            bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            return "- 주택을 소유하고 있지 않으므로\n  주택담보대출 이자 공제 대상이 아닙니다."
         return advice4
 
     def tax_saving_advice(self):
