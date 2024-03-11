@@ -9,6 +9,7 @@ import requests
 import time
 import csv
 import re
+import os
 
 # 테스트
 #####################################################################################################################
@@ -38,6 +39,8 @@ class Store():
         self.netProfit = self.totalSales - self.totalCost
         self.setInsurance()
         self.setTax()
+        if self.rentInterest == 0.0:
+            self.ownHome = False
     def setInsurance(self):
         self.pensionIns = PensionIns(self.totalLabor)
         self.healthIns = HealthIns(self.totalLabor)
@@ -106,7 +109,8 @@ class Store():
                 bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
                 advice4 += "- 대출 이자 공제가 불가능합니다.\n  최대 이자 공제 가능 금액을 초과했습니다."
         else:
-            return "주택을 소유하고 있지 않으므로\n주택담보대출 이자 공제 대상이 아닙니다."
+            bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            return "- 주택을 소유하고 있지 않으므로\n  주택담보대출 이자 공제 대상이 아닙니다."
         return advice4
 
     def tax_saving_advice(self):
@@ -272,10 +276,8 @@ class Utilities(Expenses):
 #############################################################################
 
 #############################################################################
-
 def on_store_select(item):
     global center_frame, right_frame, innerFrameList, topInnerFrameList
-    print(storeInfoList[item.row()])
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
 
@@ -409,6 +411,14 @@ crawlingList = [
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
+
+# 파일 경로에서 폴더 경로 추출
+folder_path = os.path.dirname(csvName)
+
+# 폴더가 존재하지 않으면 생성
+if not os.path.exists(folder_path) :
+    os.makedirs(folder_path)
+
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
 center_frame, right_frame = None, None
@@ -463,14 +473,11 @@ if __name__ == "__main__":
     # 왼쪽 프레임에 표 추가
     storeNameList = []
     myStore = None
-    global storeInfoList
-    storeInfoList = []
     left_table = QTableWidget()
     global myStoreList
     myStoreList = []
     left_table.clicked.connect(on_store_select)
-
-    left_table.setRowCount(6)
+    left_table.setRowCount(len(crawlingList))
     left_table.setColumnCount(1)
     
     with open(csvName, 'r', encoding='utf-8') as file:
@@ -482,20 +489,10 @@ if __name__ == "__main__":
             myStore.setTax()
             myStoreList.append(myStore)
             storeNameList.append(row[0])
-            rowList = []
-            rowList.append(row[1])
-            rowList.append(row[2])
-            rowList.append(row[3])
-            rowList.append(row[4])
-            rowList.append(row[5])
-            rowList.append(row[6])
-            rowList.append(row[7])
-            rowList.append(row[8])
-            storeInfoList.append(rowList)
     file.close()
     left_table.setVerticalHeaderLabels(storeNameList)
-    for row in range(6):
-        for column in range(6):
+    for row in range(len(crawlingList)):
+        for column in range(len(crawlingList)):
             item = QTableWidgetItem("정보 보기")
             left_table.setItem(row, column, item)
     
@@ -531,7 +528,7 @@ if __name__ == "__main__":
     
 
     center_parent_layout = QHBoxLayout()
-    for item in range(6):
+    for item in range(len(crawlingList)):
         innerFrame = QFrame()
         innerFrame.setFrameShape(QFrame.StyledPanel)
         innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -546,7 +543,7 @@ if __name__ == "__main__":
     center_frame.setLayout(center_parent_layout)
 
     right_parent_layout = QHBoxLayout()
-    for item in range(6):
+    for item in range(len(crawlingList)):
         topInnerFrame = QFrame()
         topInnerFrame.setFrameShape(QFrame.StyledPanel)
         topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
