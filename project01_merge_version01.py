@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QMenuBar, QAction, QStackedWidget, QMainWindow, QMenu
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
 from reportlab.lib.pagesizes import letter
@@ -66,10 +66,10 @@ class Store():
         """
         # 공제 가능 여부 확인
         if self.expendables > 0:
-            bottom_label2.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            annual_bottom_label2.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
             advice2 += "- 소모품 구매 비용에 대한 공제가 가능합니다."
         else:
-            bottom_label2.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            annual_bottom_label2.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             advice2 += "- 소모품 구매 비용이 없거나 음수입니다. \n  공제가 불가능합니다."
         return advice2
 
@@ -85,10 +85,10 @@ class Store():
         # 기부금 공제 가능 여부 확인
         max_deduction_amount = 0.15 * self.netProfit  # 연간 근로소득의 15%까지 공제 가능
         if self.donation <= max_deduction_amount:
-            bottom_label3.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            annual_bottom_label3.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
             advice3 += "- 기부금 공제 가능합니다."
         else:
-            bottom_label3.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            annual_bottom_label3.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             advice3 += "- 기부금 공제가 불가능합니다. \n  연간 소득 대비 기부금이 너무 많습니다."
         return advice3
     
@@ -108,13 +108,13 @@ class Store():
         if self.ownHome:
             # 대출 이자 공제 가능 여부 확인
             if self.rentInterest <= max_deduction_amount:
-                bottom_label4.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+                annual_bottom_label4.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
                 advice4 += "- 주택담보대출 이자 공제 가능합니다."
             else:
-                bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+                annual_bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
                 advice4 += "- 대출 이자 공제가 불가능합니다.\n  최대 이자 공제 가능 금액을 초과했습니다."
         else:
-            bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            annual_bottom_label4.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             return "- 주택을 소유하고 있지 않으므로\n  주택담보대출 이자 공제 대상이 아닙니다."
         return advice4
 
@@ -139,22 +139,22 @@ class Store():
     
         # 비즈니스 비용이 순 이익의 일정 비율 이하일 때
         if self.totalCost < self.netProfit * 0.3:
-            bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            annual_bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
             advice += "- 비즈니스 비용을 더 효율적으로\n  관리하여 세금 부담을 줄이세요.\n"
             advice += "  (예: 사업용 비용을 줄이거나 비즈니스\n  관련 비용을 정확하게 기록하세요)\n"
         else:
-            bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            annual_bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             # 자격 요건에 맞게 비즈니스 비용을 공제하고 세금 혜택을 최대한 활용하는 경우
             advice += "- 비즈니스 비용을 정확하게 기록하고\n  가능한 모든 공제를 활용하세요.\n"
             advice += "  (예: 업무 관련 비용, 자격 요건에\n  맞는 공제 항목을 신청하세요)\n"
     
         # 납부할 세금이 있는 경우
         if self.taxPayment > 0.0:
-            bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
+            annual_bottom_label1.setStyleSheet("font-weight: bold; color: blue; font-size: 15px; ")
             advice += "- 세무 전문가와 상의하여 가능한\n  세액 공제를 모두 활용하는 것이 좋습니다.\n"
             advice += "  (예: 세법의 변경사항을 파악하고\n  세액 공제 가능 여부를 확인하세요)"
         else:
-            bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
+            annual_bottom_label1.setStyleSheet("font-weight: bold; color: red; font-size: 15px; ")
             advice += "- 비즈니스 이익이 없거나 손실인 경우\n  세금 납부가 필요하지 않습니다."
     
         return advice
@@ -325,39 +325,39 @@ def save_to_pdf():
     c.save()
 #############################################################################
 def on_store_select(item):
-    global center_frame, right_frame, innerFrameList, topInnerFrameList
+    global annual_center_frame, annual_right_frame, annual_innerFrameList, annual_topInnerFrameList
     targetIndex = item.row()
     ## 여기에서 가게정보 보여주기
 
-    if innerFrameList[targetIndex] != None:
-        for i in range(len(innerFrameList)):
+    if annual_innerFrameList[targetIndex] != None:
+        for i in range(len(annual_innerFrameList)):
             if i != targetIndex:
-                innerFrameList[i].hide()
+                annual_innerFrameList[i].hide()
             else:
-                innerFrameList[i].show()
+                annual_innerFrameList[i].show()
     else:
         print("테이블 만들기 에러")
         return
     
-    if topInnerFrameList[targetIndex] != None:
-        for i in range(len(topInnerFrameList)):
+    if annual_topInnerFrameList[targetIndex] != None:
+        for i in range(len(annual_topInnerFrameList)):
             if i != targetIndex:
-                topInnerFrameList[i].hide()
+                annual_topInnerFrameList[i].hide()
             else:
-                topInnerFrameList[i].show()
+                annual_topInnerFrameList[i].show()
     else:
         print("테이블 만들기 에러")
         return
 
     # 가운데 프레임에 표 추가
-    center_table = QTableWidget()
+    annual_center_table = QTableWidget()
     print("table initial")
-    center_table.setRowCount(8)
+    annual_center_table.setRowCount(8)
     print("table set row count")
-    center_table.setColumnCount(3)
+    annual_center_table.setColumnCount(3)
     print("table set column count")
     #["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
-    center_table.setVerticalHeaderLabels(storeInfoHeaderList)
+    annual_center_table.setVerticalHeaderLabels(storeInfoHeaderList)
     print("table set headers")
     
     with open(r'./store_info_2022.csv', 'r', encoding='utf-8') as file:
@@ -382,17 +382,17 @@ def on_store_select(item):
             elif i == 7:
                 item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
             
-            center_table.setItem(i, 0, item)
-  
+            annual_center_table.setItem(i, 0, item)
+
             for j in range(1,9) :
                 selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
                 value = comList[selected_row][j]
-                center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
+                annual_center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
 
         for m in range(8): 
-            firstItem = center_table.item(m, 0).text()
+            firstItem = annual_center_table.item(m, 0).text()
             firstValue = int(firstItem)
-            secondItem = center_table.item(m, 1).text()
+            secondItem = annual_center_table.item(m, 1).text()
             secondValue = int(secondItem)
 
             try :
@@ -412,29 +412,29 @@ def on_store_select(item):
             elif rounded_percentValue < 0:
                 item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
 
-            center_table.setItem(m, 2, item)
+            annual_center_table.setItem(m, 2, item)
 
 
 
 
-    center_layout = QVBoxLayout()
+    annual_center_layout = QVBoxLayout()
     print("layout initial")
-    center_layout.addWidget(center_table)
+    annual_center_layout.addWidget(annual_center_table)
     print("layout add")
-    innerFrameList[targetIndex].setLayout(center_layout)
+    annual_innerFrameList[targetIndex].setLayout(annual_center_layout)
     print("frame set")
 
     # 오른쪽 프레임 레이아웃
-    right_layout = QVBoxLayout()
-    right_frame.setLayout(right_layout)
+    annual_right_layout = QVBoxLayout()
+    annual_right_frame.setLayout(annual_right_layout)
     
-    ## 여기에서 계산정보 보여주기
+    # 여기에서 계산된 정보 보여주기
     # 오른쪽 프레임 상단에 표 추가
-    top_table = QTableWidget()
-    top_table.setRowCount(7)
-    top_table.setColumnCount(1)
+    annual_top_table = QTableWidget()
+    annual_top_table.setRowCount(7)
+    annual_top_table.setColumnCount(1)
     #["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
-    top_table.setVerticalHeaderLabels(storeCalculationHeaderList)
+    annual_top_table.setVerticalHeaderLabels(storeCalculationHeaderList)
     for i in range(7):
         if i == 0:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].pensionIns.calculation())))
@@ -450,43 +450,43 @@ def on_store_select(item):
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].surTax.calculation())))
         elif i == 6:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].totalIncomeTax.calculation())))
-        top_table.setItem(i, 0, item_top)
-    top_table.setEnabled(False)
-    right_layout.addWidget(top_table)
-    topInnerFrameList[targetIndex].setLayout(right_layout)
+        annual_top_table.setItem(i, 0, item_top)
+    annual_top_table.setEnabled(False)
+    annual_right_layout.addWidget(annual_top_table)
+    annual_topInnerFrameList[targetIndex].setLayout(annual_right_layout)
 
 
     ## 여기에서 어드바이스정보 보여주기
-    # 오른쪽 프레임 하단에 표 추가
-    global bottom_label1, bottom_label2, bottom_label3, bottom_label4, button_btn
-    bottom_label1 = QLabel()
-    bottom_label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    bottom_label1.setText(str(myStoreList[targetIndex].tax_saving_advice()))
-    bottom_label1.setEnabled(False)
-    right_layout.addWidget(bottom_label1)
+    # 오른쪽 프레임 하단에 라벨 추가
+    global annual_bottom_label1, annual_bottom_label2, annual_bottom_label3, annual_bottom_label4, annual_button_btn
+    annual_bottom_label1 = QLabel()
+    annual_bottom_label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    annual_bottom_label1.setText(str(myStoreList[targetIndex].tax_saving_advice()))
+    annual_bottom_label1.setEnabled(False)
+    annual_right_layout.addWidget(annual_bottom_label1)
 
-    bottom_label2 = QLabel()
-    bottom_label2.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    bottom_label2.setText(str(myStoreList[targetIndex].check_consumable_expenses_deduction()))
-    bottom_label2.setEnabled(False)
-    right_layout.addWidget(bottom_label2)
+    annual_bottom_label2 = QLabel()
+    annual_bottom_label2.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    annual_bottom_label2.setText(str(myStoreList[targetIndex].check_consumable_expenses_deduction()))
+    annual_bottom_label2.setEnabled(False)
+    annual_right_layout.addWidget(annual_bottom_label2)
 
-    bottom_label3 = QLabel()
-    bottom_label3.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    bottom_label3.setText(str(myStoreList[targetIndex].check_charitable_donation_deduction()))
-    bottom_label3.setEnabled(False)
-    right_layout.addWidget(bottom_label3)
+    annual_bottom_label3 = QLabel()
+    annual_bottom_label3.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    annual_bottom_label3.setText(str(myStoreList[targetIndex].check_charitable_donation_deduction()))
+    annual_bottom_label3.setEnabled(False)
+    annual_right_layout.addWidget(annual_bottom_label3)
 
-    bottom_label4 = QLabel()
-    bottom_label4.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    bottom_label4.setText(str(myStoreList[targetIndex].check_mortgage_interest_deduction()))
-    bottom_label4.setEnabled(False)
-    right_layout.addWidget(bottom_label4)
+    annual_bottom_label4 = QLabel()
+    annual_bottom_label4.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    annual_bottom_label4.setText(str(myStoreList[targetIndex].check_mortgage_interest_deduction()))
+    annual_bottom_label4.setEnabled(False)
+    annual_right_layout.addWidget(annual_bottom_label4)
 
-    button_btn = QPushButton("PDF로 저장")
-    button_btn.setEnabled(True)
-    button_btn.clicked.connect(save_to_pdf)
-    right_layout.addWidget(button_btn)
+    annual_button_btn = QPushButton("PDF로 저장")
+    annual_button_btn.setEnabled(True)
+    annual_button_btn.clicked.connect(save_to_pdf)
+    annual_right_layout.addWidget(annual_button_btn)
 
 ## 전역변수
 crawlingList = [
@@ -508,9 +508,9 @@ if not os.path.exists(folder_path) :
 
 storeInfoHeaderList = ["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
 storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보험", "고용보험", "산재보험", "부가가치세", "종합소득세"]
-center_frame, right_frame = None, None
-innerFrameList = []
-topInnerFrameList = []
+annual_center_frame, annual_right_frame = None, None
+annual_innerFrameList = []
+annual_topInnerFrameList = []
 
 if __name__ == "__main__":
     fileCreated = False
@@ -544,18 +544,17 @@ if __name__ == "__main__":
                 csvFp.write(' '.join(store_infolist) + '\n')
 
     app = QApplication(sys.argv)
-    window = QWidget()
-    window.setWindowTitle("세무/회계 자동화 프로그램")
-    window.resize(1200, 900)
-
-    # 메인 레이아웃
-    main_layout = QHBoxLayout()
-    window.setLayout(main_layout)
-
+    main_window = QMainWindow()
+    main_window.setWindowTitle("세무/회계 자동화 프로그램")
+    main_window.resize(1200, 900)
+    stacked_widget = QStackedWidget()
+    widget1 = QWidget()
+    widget2 = QWidget()
+    
     # 왼쪽 프레임
-    left_frame = QFrame()
-    left_frame.setFrameShape(QFrame.StyledPanel)
-    left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    annual_left_frame = QFrame()
+    annual_left_frame.setFrameShape(QFrame.StyledPanel)
+    annual_left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     # 왼쪽 프레임에 표 추가
     storeNameList = []
@@ -611,44 +610,72 @@ if __name__ == "__main__":
     timer.start()
 
     left_layout.addWidget(left_bottom_label)
-    left_frame.setLayout(left_layout)
+    annual_left_frame.setLayout(left_layout)
     
 
-    center_parent_layout = QHBoxLayout()
+    annual_center_parent_layout = QHBoxLayout()
     for item in range(len(crawlingList)):
-        innerFrame = QFrame()
-        innerFrame.setFrameShape(QFrame.StyledPanel)
-        innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        innerFrameList.append(innerFrame)
-        center_parent_layout.addWidget(innerFrame)
-        innerFrame.setEnabled(False)
+        annual_innerFrame = QFrame()
+        annual_innerFrame.setFrameShape(QFrame.StyledPanel)
+        annual_innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        annual_innerFrameList.append(annual_innerFrame)
+        annual_center_parent_layout.addWidget(annual_innerFrame)
+        annual_innerFrame.setEnabled(False)
 
     # 가운데 프레임
-    center_frame = QFrame()
-    center_frame.setFrameShape(QFrame.StyledPanel)
-    center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    center_frame.setLayout(center_parent_layout)
+    annual_center_frame = QFrame()
+    annual_center_frame.setFrameShape(QFrame.StyledPanel)
+    annual_center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    annual_center_frame.setLayout(annual_center_parent_layout)
 
-    right_parent_layout = QHBoxLayout()
+    annual_right_parent_layout = QHBoxLayout()
     for item in range(len(crawlingList)):
-        topInnerFrame = QFrame()
-        topInnerFrame.setFrameShape(QFrame.StyledPanel)
-        topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        topInnerFrameList.append(topInnerFrame)
-        right_parent_layout.addWidget(topInnerFrame)
+        annual_topInnerFrame = QFrame()
+        annual_topInnerFrame.setFrameShape(QFrame.StyledPanel)
+        annual_topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        annual_topInnerFrameList.append(annual_topInnerFrame)
+        annual_right_parent_layout.addWidget(annual_topInnerFrame)
 
     # 오른쪽 프레임
-    right_frame = QFrame()
-    right_frame.setFrameShape(QFrame.StyledPanel)
-    right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    right_frame.setLayout(right_parent_layout)
+    annual_right_frame = QFrame()
+    annual_right_frame.setFrameShape(QFrame.StyledPanel)
+    annual_right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    annual_right_frame.setLayout(annual_right_parent_layout)
 
+    menubar = QMenuBar(main_window)
+    menubar.resize(185, 22)
 
-    # 메인 레이아웃에 프레임 추가
-    main_layout.addWidget(left_frame)
-    main_layout.addWidget(center_frame)
-    main_layout.addWidget(right_frame)
+    annual_tax_menu = QMenu('Annual Tax')
+    annual_tax_action = QAction('Annual Tax', main_window)
+    
+    private_insurance_menu =QMenu('Private Insurance')
+    private_insurance_action = QAction('Private Insurance', main_window)
+
+    annual_tax_layout = QHBoxLayout()
+    annual_tax_layout.addWidget(annual_left_frame)
+    annual_tax_layout.addWidget(annual_center_frame)
+    annual_tax_layout.addWidget(annual_right_frame)
+
+    private_label = QLabel()
+    private_label.setText("수정이 필효합니다!!!!")
+    private_insurance_layout = QHBoxLayout()
+    private_insurance_layout.addWidget(private_label)
+
+    widget1.setLayout(annual_tax_layout)
+    widget2.setLayout(private_insurance_layout)
+    stacked_widget.addWidget(widget1)
+    stacked_widget.addWidget(widget2)
+
+    annual_tax_action.triggered.connect(lambda: stacked_widget.setCurrentIndex(0))
+    private_insurance_action.triggered.connect(lambda: stacked_widget.setCurrentIndex(1))
+
+    annual_tax_menu.addAction(annual_tax_action)
+    private_insurance_menu.addAction(private_insurance_action)
+    menubar.addMenu(annual_tax_menu)
+    menubar.addMenu(private_insurance_menu)
+    main_window.setMenuBar(menubar)
+    main_window.setCentralWidget(stacked_widget)
 
     app.aboutToQuit.connect(timer.stop)
-    window.show()
+    main_window.show()
     sys.exit(app.exec_())
