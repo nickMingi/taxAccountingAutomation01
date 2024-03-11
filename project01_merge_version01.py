@@ -383,7 +383,7 @@ def on_store_select(item):
                 item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
             
             annual_center_table.setItem(i, 0, item)
-  
+
             for j in range(1,9) :
                 selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
                 value = comList[selected_row][j]
