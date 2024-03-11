@@ -2,6 +2,10 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from bs4 import BeautifulSoup
 import urllib.request
 import datetime
@@ -275,7 +279,50 @@ class Utilities(Expenses):
     
 
 #############################################################################
+def save_to_pdf():
+    # PDF 생성
+    c = canvas.Canvas("store_info.pdf", pagesize=letter)
 
+    pdfmetrics.registerFont(TTFont("맑은고딕", "malgun.ttf"))
+    c.setFont("맑은고딕", 16)
+
+    # 선택된 가게 정보 가져오기
+    selected_store_index = left_table.currentRow()
+    selected_store = myStoreList[selected_store_index]
+
+    # PDF에 가게 정보 추가
+    c.drawString(100, 750, "가게 정보")
+    c.drawString(100, 730, f"가게명: {selected_store.name}")
+    c.drawString(100, 710, f"총 매출: {selected_store.totalSales}")
+    c.drawString(100, 690, f"재료비: {selected_store.ingredients}")
+    c.drawString(100, 670, f"인건비: {selected_store.totalLabor}")
+    c.drawString(100, 650, f"소모품: {selected_store.expendables}")
+    c.drawString(100, 630, f"주담대: {selected_store.rentInterest}")
+    c.drawString(100, 610, f"임차료: {selected_store.rentFee}")
+    c.drawString(100, 590, f"공과금: {selected_store.utilities}")
+    c.drawString(100, 570, f"기부금: {selected_store.donation}")
+
+    # PDF에 계산된 세금 정보 추가
+    c.drawString(100, 530, "계산된 세금 정보")
+    c.drawString(100, 510, f"국민연금: {selected_store.pensionIns.calculation()}")
+    c.drawString(100, 490, f"건강보험: {selected_store.healthIns.calculation()}")
+    c.drawString(100, 470, f"장기요양보험: {selected_store.convalscenceIns.calculation()}")
+    c.drawString(100, 450, f"고용보험: {selected_store.employmentIns.calculation()}")
+    c.drawString(100, 430, f"산재보험: {selected_store.occupationalIns.calculation()}")
+    c.drawString(100, 410, f"부가가치세: {selected_store.surTax.calculation()}")
+    c.drawString(100, 390, f"종합소득세: {selected_store.totalIncomeTax.calculation()}")
+
+    # PDF에 어드바이스 정보 추가
+    c.drawString(100, 350, "")
+    advice = selected_store.tax_saving_advice()
+    advice_lines = advice.split("\n")
+    y_position = 350
+    for line in advice_lines:
+        c.drawString(100, y_position, line)
+        y_position -= 20
+
+    # PDF 저장
+    c.save()
 #############################################################################
 def on_store_select(item):
     global center_frame, right_frame, innerFrameList, topInnerFrameList
@@ -438,6 +485,7 @@ def on_store_select(item):
 
     button_btn = QPushButton("PDF로 저장")
     button_btn.setEnabled(True)
+    button_btn.clicked.connect(save_to_pdf)
     right_layout.addWidget(button_btn)
 
 ## 전역변수
