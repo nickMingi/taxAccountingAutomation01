@@ -313,7 +313,7 @@ def on_store_select(item):
     center_table.setVerticalHeaderLabels(storeInfoHeaderList)
     print("table set headers")
     
-    with open(r'C:\Projects\Project1_WorkAutomation\result\store_info_2022.csv', 'r', encoding='utf-8') as file:
+    with open(r'./store_info_2022.csv', 'r', encoding='utf-8') as file:
         inFile = csv.reader(file)
         comList = list(inFile)
 
