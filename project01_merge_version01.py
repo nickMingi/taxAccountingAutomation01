@@ -364,32 +364,41 @@ def on_store_select(item):
         elif i == 6:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].totalIncomeTax.calculation())))
         top_table.setItem(i, 0, item_top)
+    top_table.setEnabled(False)
     right_layout.addWidget(top_table)
     topInnerFrameList[targetIndex].setLayout(right_layout)
 
 
     ## 여기에서 어드바이스정보 보여주기
     # 오른쪽 프레임 하단에 표 추가
-    global bottom_label1, bottom_label2, bottom_label3, bottom_label4
+    global bottom_label1, bottom_label2, bottom_label3, bottom_label4, button_btn
     bottom_label1 = QLabel()
     bottom_label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label1.setText(str(myStoreList[targetIndex].tax_saving_advice()))
+    bottom_label1.setEnabled(False)
     right_layout.addWidget(bottom_label1)
 
     bottom_label2 = QLabel()
     bottom_label2.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label2.setText(str(myStoreList[targetIndex].check_consumable_expenses_deduction()))
+    bottom_label2.setEnabled(False)
     right_layout.addWidget(bottom_label2)
 
     bottom_label3 = QLabel()
     bottom_label3.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label3.setText(str(myStoreList[targetIndex].check_charitable_donation_deduction()))
+    bottom_label3.setEnabled(False)
     right_layout.addWidget(bottom_label3)
 
     bottom_label4 = QLabel()
     bottom_label4.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     bottom_label4.setText(str(myStoreList[targetIndex].check_mortgage_interest_deduction()))
+    bottom_label4.setEnabled(False)
     right_layout.addWidget(bottom_label4)
+
+    button_btn = QPushButton("PDF로 저장")
+    button_btn.setEnabled(True)
+    right_layout.addWidget(button_btn)
 
 ## 전역변수
 crawlingList = [
@@ -545,7 +554,7 @@ if __name__ == "__main__":
     right_frame.setFrameShape(QFrame.StyledPanel)
     right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     right_frame.setLayout(right_parent_layout)
-    right_frame.setEnabled(False)
+
 
     # 메인 레이아웃에 프레임 추가
     main_layout.addWidget(left_frame)
