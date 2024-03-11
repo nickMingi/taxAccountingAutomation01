@@ -382,17 +382,17 @@ def on_store_select(item):
             elif i == 7:
                 item = QTableWidgetItem(str(myStoreList[targetIndex].donation))
             
-            center_table.setItem(i, 0, item)
+            annual_center_table.setItem(i, 0, item)
   
             for j in range(1,9) :
                 selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
                 value = comList[selected_row][j]
-                center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
+                annual_center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
 
         for m in range(8): 
-            firstItem = center_table.item(m, 0).text()
+            firstItem = annual_center_table.item(m, 0).text()
             firstValue = int(firstItem)
-            secondItem = center_table.item(m, 1).text()
+            secondItem = annual_center_table.item(m, 1).text()
             secondValue = int(secondItem)
 
             try :
@@ -412,7 +412,7 @@ def on_store_select(item):
             elif rounded_percentValue < 0:
                 item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
 
-            center_table.setItem(m, 2, item)
+            annual_center_table.setItem(m, 2, item)
 
 
 
