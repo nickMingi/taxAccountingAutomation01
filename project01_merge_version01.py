@@ -24,7 +24,7 @@ from PyQt5.QtGui import QColor
 # 클래스 정의
 class Store():
     name = ""
-    netProfit, businessExpenses, taxPayment, totalInterestPaid, maxDeductionAmount = 0, 0, 0, 0, 0
+    netProfit, taxPayment = 0, 0
     ownHome = True
     totalSales, ingredients, totalLabor, expendables, rentInterest, rentFee, utilities, donation = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     totalIncomeTax, surTax = None, None
@@ -61,7 +61,7 @@ class Store():
         """
         소모품 구매 비용에 대한 공제 가능 여부를 확인하는 함수
     
-        :param expenses: 소모품 구매 비용
+        :param expendables: 소모품 구매 비용
         :return: 공제 가능 여부에 대한 문자열
         """
         # 공제 가능 여부 확인
@@ -78,7 +78,7 @@ class Store():
         """
         기부금 공제 가능 여부를 확인하는 함수
     
-        :param donation_amount: 기부한 금액
+        :param self.donation: 기부한 금액
         :param annual_income: 연간 근로소득
         :return: 기부금 공제 가능 여부에 대한 문자열
         """
@@ -98,7 +98,7 @@ class Store():
         주택담보대출 이자 공제 여부를 확인하는 함수
     
         :param own_home: 주택 소유 여부 (True or False)
-        :param total_interest_paid: 납부한 총 이자
+        :param self.rentInterst: 납부한 총 이자
         :param max_deduction_amount: 최대 이자 공제 가능 금액
         :return: 주택담보대출 이자 공제 여부에 대한 문자열
         """
@@ -122,15 +122,10 @@ class Store():
         """
         세금 절약을 위한 조언을 제공하는 함수
     
-        :param net_profit: 순 이익 (수익 - 비용)
-        :param business_expenses: 비즈니스 운영에 소요되는 비용
-        :param tax_payment: 납부할 세금
-        :param own_home: 주택 소유 여부 (True or False)
+        :param self.netProfit: 순 이익 (수익 - 비용)
+        :param self.totalCost: 비즈니스 운영에 소요되는 비용
+        :param self.taxPayment: 납부할 세금
         :param total_interest_paid: 납부한 총 이자
-        :param max_deduction_amount: 최대 이자 공제 가능 금액
-        :param expenses: 계산된 소모품 구매 비용
-        :param donation_amount: 계산된 기부금
-        :param annual_income: 연간 근로소득
         :return: 조언 문자열
         """
         print("advice inside")
@@ -159,23 +154,6 @@ class Store():
     
         return advice
 
-############################################################################
-
-class Employee():
-    name = ""
-    age, phone, totalLabor = 0, 0, 0.0
-    pensionIns, healthIns, convalescenceIns, employmentIns, occupationalIns = None, None, None, None, None
-    def __init__(self, pEmployeeInfo):
-        self.name = pEmployeeInfo[0]
-        self.age = pEmployeeInfo[1]
-        self.phone = pEmployeeInfo[2]
-        self.totalLabor = pEmployeeInfo[3]
-        self.setInsurance()
-    def setInsurance(self):
-        self.pensionIns = PensionIns(self.totalLabor)
-        self.healthIns = HealthIns(self.totalLabor)
-        self.convalescenceIns = ConvalescenceIns(self.totalLabor)
-        self.employmentIns = EmploymentIns(self.totalLabor)
 
 ###########################################################################
 class Tax(): # 세금 - 종합소득세 , 부가세
