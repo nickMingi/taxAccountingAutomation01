@@ -580,7 +580,7 @@ crawlingList = [
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
 employee_csvNameList = ["./management/kimbab.csv", "./management/paris.csv", 
                         "./management/jjambbong.csv", "./management/yougane.csv",
-                        "./bbq.csv", "./management/lotteria.csv"]
+                        "./management/bbq.csv", "./management/lotteria.csv"]
 
 # 파일 경로에서 폴더 경로 추출
 folder_path = os.path.dirname(csvName)
