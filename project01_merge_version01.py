@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QMenuBar, QAction, QStackedWidget, QMainWindow, QMenu
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy, QLabel, QPushButton, QMenuBar, QAction, QStackedWidget, QMainWindow, QMenu, QMessageBox
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
 from reportlab.lib.pagesizes import letter
@@ -322,7 +322,20 @@ def save_to_pdf():
         y_position -= 20
 
     # PDF 저장
+    save_path = "store_info.pdf"
     c.save()
+
+    #저장 완료 메시지 표시
+    if os.path.exists(save_path):
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("저장 완료")
+        msg_box.setText(f"PDF가 성공적으로 저장되었습니다. 경로 : {os.path.abspath(save_path)}")
+        msg_box.exec_()
+    else :
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("저장 실패")
+        msg_box.setText("PDF 저장에 실패했습니다.")
+        msg_box.exec_()
 #############################################################################
 def on_store_select(item):
     global annual_center_frame, annual_right_frame, annual_innerFrameList, annual_topInnerFrameList
