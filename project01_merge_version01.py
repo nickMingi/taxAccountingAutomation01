@@ -279,8 +279,29 @@ class Utilities(Expenses):
         return self.totalCost
     
     
+# class AppDemo(QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle('프로그래스')
+#         self.resize(400,140)
 
-#############################################################################
+#         self.progressBar = QProgressBar(self)
+#         pg = self.progressBar
+#         pg.setGeometry(20,20,300,40)
+#         pg.setMaximum(100)
+#         pg.setValue(0)
+
+#         timer = QTimer(self)
+#         timer.timeout.connect(self.Increase_step)
+#         timer.start(500)
+
+#     def Increase_step(self):
+#         for i in range(10) :
+#             currentValue = self.progressBar.value() + 1
+#             self.progressBar.setValue(currentValue)
+#             if currentValue == 100 :
+#                app.closeAllWindows()
+############################################################################# 프로그래스 수정중
 
 #############################################################################
 def on_store_select(item):
@@ -344,36 +365,54 @@ def on_store_select(item):
             center_table.setItem(i, 0, item)
   
             for j in range(1,9) :
-                selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
-                value = comList[selected_row][j]
+                if entered_id == '김밥천국서초점' :
+                    value = comList[0][j]
+                elif entered_id == '파리바게뜨강남점' :
+                    value = comList[1][j]
+                elif entered_id == '짬뽕타운서초점' :
+                    value = comList[2][j]
+                elif entered_id == '유가네강동점' :
+                    value = comList[3][j]
+                elif entered_id == '비비큐남부터미널점' :
+                    value = comList[4][j]
+                elif entered_id == '롯데리아서초점' :
+                    value = comList[5][j]
+                else :
+                    selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
+                    value = comList[selected_row][j]
                 center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
 
-        for m in range(8): 
-            firstItem = center_table.item(m, 0).text()
-            firstValue = int(firstItem)
-            secondItem = center_table.item(m, 1).text()
-            secondValue = int(secondItem)
-
+        if entered_id == "a" :
             try :
-                percentValue = (firstValue-secondValue)/firstValue*100
-                rounded_percentValue = round(percentValue, 2)
-                rpv = rounded_percentValue
-                if rpv > 0 :
-                    rpv = "+" + str(rpv) + "%"
-                elif rpv < 0 :
-                    rpv = str(rpv) + '%'
+                for m in range(8): 
+                    try :
+                        firstItem = center_table.item(m, 0).text()
+                        firstValue = int(firstItem)
+                        secondItem = center_table.item(m, 1).text()
+                        secondValue = int(secondItem)
+                    except :
+                        pass
+
+                    try :
+                        percentValue = (firstValue-secondValue)/firstValue*100
+                        rounded_percentValue = round(percentValue, 2)
+                        rpv = rounded_percentValue
+                        if rpv > 0 :
+                            rpv = "+" + str(rpv) + "%"
+                        elif rpv < 0 :
+                            rpv = str(rpv) + '%'
+                    except :
+                        rpv = 0
+
+                    item = QTableWidgetItem(str(rpv))
+                    if rounded_percentValue > 0:
+                        item.setForeground(QColor('red'))  # 글자색을 빨간색으로 설정
+                    elif rounded_percentValue < 0:
+                        item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
+
+                    center_table.setItem(m, 2, item)
             except :
-                rpv = 0
-
-            item = QTableWidgetItem(str(rpv))
-            if rounded_percentValue > 0:
-                item.setForeground(QColor('red'))  # 글자색을 빨간색으로 설정
-            elif rounded_percentValue < 0:
-                item.setForeground(QColor('blue'))  # 글자색을 파란색으로 설정
-
-            center_table.setItem(m, 2, item)
-
-
+                pass
 
 
     center_layout = QVBoxLayout()
@@ -480,19 +519,21 @@ current_index = 0 # 사진 초기 값
 
 def login():
     # 입력한 아이디와 비밀번호 가져오기
+    global entered_id
     entered_id = id_entry.get()
     entered_password = password_entry.get()
-
     # 아이디와 비밀번호 확인
-    if entered_id == "a" and entered_password == "1":  ########################### 아이디 a / 비밀번호 1 (관리자 아이디 >> 모든 정보 열람 가능)
+    if (entered_id == "a" or '김밥천국서초점' or '파리바게뜨강남점' or '짬뽕타운서초점' or '유가네강동점' or '비비큐남부터미널점' or '롯데리아서초점') and (entered_password == "1"):
+        ########################### 아이디 a / 비밀번호 1 (관리자 아이디 >> 모든 정보 열람 가능)
         global window
         # 로그인 성공 메시지 표시
         messagebox.showinfo("로그인 성공", "로그인에 성공했습니다.")
         # 로그인 창 닫기
         root.destroy()
         # 새창열기
+
         if __name__ == "__main__":
-            fileCreated = False            
+            fileCreated = False
             for storeUrl in crawlingList:
                 url = f"https://mingihong.wixsite.com/fiveman/{storeUrl[0]}"
                 # print(url)
@@ -554,7 +595,7 @@ def login():
             left_table.setColumnCount(1)
             
             with open(csvName, 'r', encoding='utf-8') as file:
-                reader = csv.reader(file)
+                reader = csv.reader(file)            
                 for row in reader:
                     tempList = [row[0],int(row[1]),int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7]),int(row[8])]
                     myStore = Store(tempList)
@@ -564,6 +605,8 @@ def login():
                     storeNameList.append(row[0])
             file.close()
             left_table.setVerticalHeaderLabels(storeNameList)
+
+
             for row in range(len(crawlingList)):
                 for column in range(len(crawlingList)):
                     item = QTableWidgetItem("정보 보기")
