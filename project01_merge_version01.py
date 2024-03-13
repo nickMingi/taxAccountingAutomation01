@@ -28,7 +28,7 @@ class Store():
     ownHome = True
     totalSales, ingredients, totalLabor, expendables, rentInterest, rentFee, utilities, donation = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     totalIncomeTax, surTax = None, None
-    pensionIns, healthIns, convalscenceIns, employmentIns, occupationalIns = None, None, None, None, None
+    pensionIns, healthIns, convalescenceIns, employmentIns, occupationalIns = None, None, None, None, None
     # 가게명, 총매출, 자재값, 인건비, 소모품, 주담대, 기부금, 공과금
     def __init__(self,pStoreInfo):
         self.name = pStoreInfo[0]
@@ -49,7 +49,7 @@ class Store():
     def setInsurance(self):
         self.pensionIns = PensionIns(self.totalLabor)
         self.healthIns = HealthIns(self.totalLabor)
-        self.convalscenceIns = ConvalscenceIns(self.totalLabor)
+        self.convalescenceIns = ConvalescenceIns(self.totalLabor)
         self.employmentIns = EmploymentIns(self.totalLabor)
         self.occupationalIns = OccupationalIns(self.totalLabor)
     def setTax(self):
@@ -158,7 +158,25 @@ class Store():
             advice += "- 비즈니스 이익이 없거나 손실인 경우\n  세금 납부가 필요하지 않습니다."
     
         return advice
-    
+
+############################################################################
+
+class Employee():
+    name = ""
+    age, phone, totalLabor = 0, 0, 0.0
+    pensionIns, healthIns, convalescenceIns, employmentIns, occupationalIns = None, None, None, None, None
+    def __init__(self, pEmployeeInfo):
+        self.name = pEmployeeInfo[0]
+        self.age = pEmployeeInfo[1]
+        self.phone = pEmployeeInfo[2]
+        self.totalLabor = pEmployeeInfo[3]
+        self.setInsurance()
+    def setInsurance(self):
+        self.pensionIns = PensionIns(self.totalLabor)
+        self.healthIns = HealthIns(self.totalLabor)
+        self.convalescenceIns = ConvalescenceIns(self.totalLabor)
+        self.employmentIns = EmploymentIns(self.totalLabor)
+
 ###########################################################################
 class Tax(): # 세금 - 종합소득세 , 부가세
     totalSales, netProfit = 0.0, 0.0
@@ -205,10 +223,10 @@ class HealthIns(Insurance): # 건강보험
     def calculation(self):
         return self.totalLabor * self.healthRate
 
-class ConvalscenceIns(Insurance): # 장기요양보험
-    convalscenceRate = 0.004591
+class ConvalescenceIns(Insurance): # 장기요양보험
+    convalescenceRate = 0.004591
     def calculation(self):
-        return self.totalLabor * self.convalscenceRate
+        return self.totalLabor * self.convalescenceRate
 
 class EmploymentIns(Insurance): # 고용보험
     employmentRate = 0.0115
@@ -287,7 +305,7 @@ def save_to_pdf():
     c.setFont("맑은고딕", 16)
 
     # 선택된 가게 정보 가져오기
-    selected_store_index = left_table.currentRow()
+    selected_store_index = annual_left_table.currentRow()
     selected_store = myStoreList[selected_store_index]
 
     # PDF에 가게 정보 추가
@@ -306,7 +324,7 @@ def save_to_pdf():
     c.drawString(100, 530, "계산된 세금 정보")
     c.drawString(100, 510, f"국민연금: {selected_store.pensionIns.calculation()}")
     c.drawString(100, 490, f"건강보험: {selected_store.healthIns.calculation()}")
-    c.drawString(100, 470, f"장기요양보험: {selected_store.convalscenceIns.calculation()}")
+    c.drawString(100, 470, f"장기요양보험: {selected_store.convalescenceIns.calculation()}")
     c.drawString(100, 450, f"고용보험: {selected_store.employmentIns.calculation()}")
     c.drawString(100, 430, f"산재보험: {selected_store.occupationalIns.calculation()}")
     c.drawString(100, 410, f"부가가치세: {selected_store.surTax.calculation()}")
@@ -351,14 +369,10 @@ def on_store_select(item):
 
     # 가운데 프레임에 표 추가
     annual_center_table = QTableWidget()
-    print("table initial")
     annual_center_table.setRowCount(8)
-    print("table set row count")
     annual_center_table.setColumnCount(3)
-    print("table set column count")
     #["총 매출", "재료비", "인건비", "소모품", "주담대", "임차료", "공과금", "기부금"]
     annual_center_table.setVerticalHeaderLabels(storeInfoHeaderList)
-    print("table set headers")
     
     with open(r'./store_info_2022.csv', 'r', encoding='utf-8') as file:
         inFile = csv.reader(file)
@@ -385,7 +399,7 @@ def on_store_select(item):
             annual_center_table.setItem(i, 0, item)
 
             for j in range(1,9) :
-                selected_row = left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
+                selected_row = annual_left_table.currentRow()  # 왼쪽 테이블의 행 번호를 가져오기
                 value = comList[selected_row][j]
                 annual_center_table.setItem(j-1,1,QTableWidgetItem(str(value)))
 
@@ -414,15 +428,9 @@ def on_store_select(item):
 
             annual_center_table.setItem(m, 2, item)
 
-
-
-
     annual_center_layout = QVBoxLayout()
-    print("layout initial")
     annual_center_layout.addWidget(annual_center_table)
-    print("layout add")
     annual_innerFrameList[targetIndex].setLayout(annual_center_layout)
-    print("frame set")
 
     # 오른쪽 프레임 레이아웃
     annual_right_layout = QVBoxLayout()
@@ -441,7 +449,7 @@ def on_store_select(item):
         elif i == 1:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].healthIns.calculation())))
         elif i == 2:
-            item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].convalscenceIns.calculation())))
+            item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].convalescenceIns.calculation())))
         elif i == 3:
             item_top = QTableWidgetItem(str(int(myStoreList[targetIndex].employmentIns.calculation())))
         elif i == 4:
@@ -488,6 +496,65 @@ def on_store_select(item):
     annual_button_btn.clicked.connect(save_to_pdf)
     annual_right_layout.addWidget(annual_button_btn)
 
+def private_store_select(item2):
+    global private_center_frame, private_center_innerFrameList
+    global targetIndex2
+    targetIndex2 = item2.row()
+    # 가게 직원 정보
+
+    private_center_parent_layout = QHBoxLayout()
+    for i in range(len(storeNameList)):
+        private_center_innerFrame = QFrame()
+        private_center_innerFrame.setFrameShape(QFrame.StyledPanel)
+        private_center_innerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        private_center_innerFrameList.append(private_center_innerFrame)
+        private_center_parent_layout.addWidget(private_center_innerFrame)
+    private_center_frame.setLayout(private_center_parent_layout)
+
+    if private_center_innerFrameList[targetIndex2] != None:
+        for i in range(len(private_center_innerFrameList)):
+            if i != targetIndex2:
+                private_center_innerFrameList[i].hide()
+            else:
+                private_center_innerFrameList[i].show()
+    else:
+        print("테이블 만들기 에러")
+        return
+
+    # 가운데 프레임에 표 추가
+    private_center_table = QTableWidget()
+    private_center_table.setRowCount(len(employee_dict[targetIndex2]['이름']))
+    private_center_table.setColumnCount(1)
+    private_center_table.setVerticalHeaderLabels(employee_dict[targetIndex2]['이름'])
+
+    for row in range(len(employee_dict[targetIndex2]['이름'])):
+        for column in range(len(employee_dict[targetIndex2]['이름'])):
+            item = QTableWidgetItem("정보 보기")
+            private_center_table.setItem(row, column, item)
+
+    private_center_layout = QVBoxLayout()
+    private_center_layout.addWidget(private_center_table)
+    private_center_innerFrameList[targetIndex2].setLayout(private_center_layout)
+
+    private_center_table.clicked.connect(on_employee_select)
+
+def on_employee_select(item3):
+    global private_right_frame
+    
+    targetIndex3 = item3.row()
+            
+    for i in range(3):
+        item4 = QTableWidgetItem(employee_dict[targetIndex2][privateHeaderList[i]][targetIndex3])
+        private_right_table.setItem(i, 0, item4)
+
+    Insrate = [0.045, 0.03545, 0.004591, 0.009]
+    for j in range(3, 7):
+        salaryValue = float(employee_dict[targetIndex2]['연봉'][targetIndex3])
+        item5 = QTableWidgetItem(str(salaryValue * Insrate[j-3]))
+        private_right_table.setItem(j, 0, item5)
+    private_right_table.setEnabled(False)
+    
+    
 ## 전역변수
 crawlingList = [
     ["kimbop-heaven","#comp-j82zpp8j > h1","#comp-j82zpp8b"],
@@ -498,6 +565,9 @@ crawlingList = [
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
+employee_csvNameList = ["C:/Projects/Project1_WorkAutomation/management/kimbab.csv", "C:/Projects/Project1_WorkAutomation/management/paris.csv", 
+                        "C:/Projects/Project1_WorkAutomation/management/jjambbong.csv", "C:/Projects/Project1_WorkAutomation/management/yougane.csv",
+                        "C:/Projects/Project1_WorkAutomation/management/bbq.csv", "C:/Projects/Project1_WorkAutomation/management/lotteria.csv"]
 
 # 파일 경로에서 폴더 경로 추출
 folder_path = os.path.dirname(csvName)
@@ -511,6 +581,11 @@ storeCalculationHeaderList = ["국민연금", "건강보험", "장기요양보�
 annual_center_frame, annual_right_frame = None, None
 annual_innerFrameList = []
 annual_topInnerFrameList = []
+
+privateHeaderList = ["이름", "나이", "연봉", "국민연금", "건강보험", "장기요양보험", "고용보험"]
+private_center_frame, private_right_frame = None, None
+private_center_innerFrameList = []
+private_right_innerFrameList = []
 
 if __name__ == "__main__":
     fileCreated = False
@@ -556,15 +631,24 @@ if __name__ == "__main__":
     annual_left_frame.setFrameShape(QFrame.StyledPanel)
     annual_left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+    private_left_frame = QFrame()
+    private_left_frame.setFrameShape(QFrame.StyledPanel)
+    private_left_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
     # 왼쪽 프레임에 표 추가
     storeNameList = []
     myStore = None
-    left_table = QTableWidget()
+    annual_left_table = QTableWidget()
     global myStoreList
     myStoreList = []
-    left_table.clicked.connect(on_store_select)
-    left_table.setRowCount(len(crawlingList))
-    left_table.setColumnCount(1)
+    annual_left_table.clicked.connect(on_store_select)
+    annual_left_table.setRowCount(len(crawlingList))
+    annual_left_table.setColumnCount(1)
+
+    private_left_table = QTableWidget()
+    private_left_table.clicked.connect(private_store_select)
+    private_left_table.setRowCount(len(crawlingList))
+    private_left_table.setColumnCount(1)
     
     with open(csvName, 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
@@ -576,15 +660,35 @@ if __name__ == "__main__":
             myStoreList.append(myStore)
             storeNameList.append(row[0])
     file.close()
-    left_table.setVerticalHeaderLabels(storeNameList)
+    annual_left_table.setVerticalHeaderLabels(storeNameList)
     for row in range(len(crawlingList)):
         for column in range(len(crawlingList)):
             item = QTableWidgetItem("정보 보기")
-            left_table.setItem(row, column, item)
-    
-    left_layout = QVBoxLayout()
-    left_layout.addWidget(left_table)
+            annual_left_table.setItem(row, column, item)
 
+    employee_dict = {}
+
+    for i, employee_csvName in enumerate(employee_csvNameList):
+        with open(employee_csvName, 'r', encoding='utf-8') as eFile:
+            reader = csv.reader(eFile)
+            rows = list(reader)
+            keys = rows[0]
+            values = rows[1:]
+            employee_dict[i] = {key: value for key, value in zip(keys, zip(*values))}
+    
+    annual_left_layout = QVBoxLayout()
+    annual_left_layout.addWidget(annual_left_table)
+
+    private_left_table.setVerticalHeaderLabels(storeNameList)
+    for row in range(len(crawlingList)):
+        for column in range(len(crawlingList)):
+            item = QTableWidgetItem("정보 보기")
+            private_left_table.setItem(row, column, item)
+    
+    private_left_layout = QVBoxLayout()
+    private_left_layout.addWidget(private_left_table)
+
+    # 광고 이미지 추가
     pixmap_list = []
     image_paths = ['./advertisement/adv1.jpg', './advertisement/adv2.jpg', './advertisement/adv3.jpg']
     
@@ -592,26 +696,55 @@ if __name__ == "__main__":
         pixmap = QPixmap(path)
         pixmap_list.append(pixmap)
 
-    left_bottom_label = QLabel()
-    timer = QTimer(left_bottom_label)
-    left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    left_bottom_label.setPixmap(pixmap_list[0])
-    timer.setInterval(5000)
-    timer.setSingleShot(False)  # 단일 실행 모드 해제
+    # 왼쪽 프레임에 라벨 추가
+    annual_left_bottom_label = QLabel()
+    annual_timer = QTimer(annual_left_bottom_label)
+    annual_left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    annual_left_bottom_label.setPixmap(pixmap_list[0])
+    annual_timer.setInterval(5000)
+    annual_timer.setSingleShot(False)  # 단일 실행 모드 해제
+
+    private_left_bottom_label = QLabel()
+    private_timer = QTimer(private_left_bottom_label)
+    private_left_bottom_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    private_left_bottom_label.setPixmap(pixmap_list[0])
+    private_timer.setInterval(5000)
+    private_timer.setSingleShot(False)  # 단일 실행 모드 해제
 
     current_index = 0
     def change_image():
         global current_index
         next_index = (current_index + 1) % len(pixmap_list)
-        left_bottom_label.setPixmap(pixmap_list[next_index])
+        annual_left_bottom_label.setPixmap(pixmap_list[next_index])
         current_index = next_index
 
-    timer.timeout.connect(change_image)
-    timer.start()
+    private_current_index = 0
+    def private_change_image():
+        global private_current_index
+        private_next_index = (private_current_index + 1) % len(pixmap_list)
+        private_left_bottom_label.setPixmap(pixmap_list[private_next_index])
+        private_current_index = private_next_index
 
-    left_layout.addWidget(left_bottom_label)
-    annual_left_frame.setLayout(left_layout)
-    
+    annual_timer.timeout.connect(change_image)
+    annual_timer.start()
+
+    private_timer.timeout.connect(private_change_image)
+    private_timer.start()
+
+    annual_left_layout.addWidget(annual_left_bottom_label)
+    annual_left_frame.setLayout(annual_left_layout)
+
+    private_left_layout.addWidget(private_left_bottom_label)
+    private_left_frame.setLayout(private_left_layout)
+
+    # 가운데 프레임
+    annual_center_frame = QFrame()
+    annual_center_frame.setFrameShape(QFrame.StyledPanel)
+    annual_center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+    private_center_frame = QFrame()
+    private_center_frame.setFrameShape(QFrame.StyledPanel)
+    private_center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     annual_center_parent_layout = QHBoxLayout()
     for item in range(len(crawlingList)):
@@ -621,12 +754,29 @@ if __name__ == "__main__":
         annual_innerFrameList.append(annual_innerFrame)
         annual_center_parent_layout.addWidget(annual_innerFrame)
         annual_innerFrame.setEnabled(False)
-
-    # 가운데 프레임
-    annual_center_frame = QFrame()
-    annual_center_frame.setFrameShape(QFrame.StyledPanel)
-    annual_center_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     annual_center_frame.setLayout(annual_center_parent_layout)
+
+    # 오른쪽 프레임
+    annual_right_frame = QFrame()
+    annual_right_frame.setFrameShape(QFrame.StyledPanel)
+    annual_right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+    private_right_frame = QFrame()
+    private_right_frame.setFrameShape(QFrame.StyledPanel)
+    private_right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+    # 오른쪽 프레임 레이아웃
+    private_right_layout = QVBoxLayout()
+    private_right_frame.setLayout(private_right_layout)
+
+    # 여기에서 계산된 정보 보여주기
+    # 오른쪽 프레임 상단에 표 추가
+    private_right_table = QTableWidget()
+    private_right_table.setRowCount(7)
+    private_right_table.setColumnCount(1)
+    #["이름", "나이", "전화번호", "연봉", "국민연금", "건강보험", "장기요양보험", "고용보험"]
+    private_right_table.setVerticalHeaderLabels(privateHeaderList)
+    private_right_layout.addWidget(private_right_table)
 
     annual_right_parent_layout = QHBoxLayout()
     for item in range(len(crawlingList)):
@@ -635,13 +785,9 @@ if __name__ == "__main__":
         annual_topInnerFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         annual_topInnerFrameList.append(annual_topInnerFrame)
         annual_right_parent_layout.addWidget(annual_topInnerFrame)
-
-    # 오른쪽 프레임
-    annual_right_frame = QFrame()
-    annual_right_frame.setFrameShape(QFrame.StyledPanel)
-    annual_right_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     annual_right_frame.setLayout(annual_right_parent_layout)
 
+    # 메뉴바 구성
     menubar = QMenuBar(main_window)
     menubar.resize(185, 22)
 
@@ -651,15 +797,17 @@ if __name__ == "__main__":
     private_insurance_menu =QMenu('Private Insurance')
     private_insurance_action = QAction('Private Insurance', main_window)
 
+    # 연간 레이아웃
     annual_tax_layout = QHBoxLayout()
     annual_tax_layout.addWidget(annual_left_frame)
     annual_tax_layout.addWidget(annual_center_frame)
     annual_tax_layout.addWidget(annual_right_frame)
 
-    private_label = QLabel()
-    private_label.setText("수정이 필효합니다!!!!")
+    # 직원 관리 레이아웃
     private_insurance_layout = QHBoxLayout()
-    private_insurance_layout.addWidget(private_label)
+    private_insurance_layout.addWidget(private_left_frame)
+    private_insurance_layout.addWidget(private_center_frame)
+    private_insurance_layout.addWidget(private_right_frame)
 
     widget1.setLayout(annual_tax_layout)
     widget2.setLayout(private_insurance_layout)
@@ -676,6 +824,7 @@ if __name__ == "__main__":
     main_window.setMenuBar(menubar)
     main_window.setCentralWidget(stacked_widget)
 
-    app.aboutToQuit.connect(timer.stop)
+    app.aboutToQuit.connect(annual_timer.stop)
+    app.aboutToQuit.connect(private_timer.stop)
     main_window.show()
     sys.exit(app.exec_())
