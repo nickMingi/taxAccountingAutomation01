@@ -565,9 +565,9 @@ crawlingList = [
     ["lotteria","#comp-j830bu6t > h1","#comp-j830bu6m"]
     ]
 csvName = "C:/Projects/Project1_WorkAutomation/result/store_info.csv"
-employee_csvNameList = ["C:/Projects/Project1_WorkAutomation/management/kimbab.csv", "C:/Projects/Project1_WorkAutomation/management/paris.csv", 
-                        "C:/Projects/Project1_WorkAutomation/management/jjambbong.csv", "C:/Projects/Project1_WorkAutomation/management/yougane.csv",
-                        "C:/Projects/Project1_WorkAutomation/management/bbq.csv", "C:/Projects/Project1_WorkAutomation/management/lotteria.csv"]
+employee_csvNameList = ["./management/kimbab.csv", "./management/paris.csv", 
+                        "./management/jjambbong.csv", "./management/yougane.csv",
+                        "./bbq.csv", "./management/lotteria.csv"]
 
 # 파일 경로에서 폴더 경로 추출
 folder_path = os.path.dirname(csvName)
