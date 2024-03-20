@@ -193,7 +193,7 @@
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="URdi0woXqEubxFGcnrAvvQAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="ziECjjLBIE2wKq2tmoyrbgAA">
 <XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">월간 직원 월급 계산 메뉴</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">월간 직원 월급 계산 메뉴 클릭</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="8hqpwugdCkaNrwENm8O7ywAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -259,7 +259,7 @@
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="DmLXKzkkYE24T9fyR8cMnAAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="6zypJ46Pu0SHZtyUB3eOawAA">
 <XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">년간 가게 세금 계산 메뉴</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">년간 가게 세금 계산 메뉴 클릭</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="E1K31pp7/UeWa3wj7paYeAAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -1099,7 +1099,7 @@
 <XPD:REF name="Extenders[0]">cgM5zYPZOkOCUnkqQUYjqgAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[5]" type="UMLUseCase" guid="NJOdMBFyZUKavCRWjX3J2wAA">
-<XPD:ATTR name="Name" type="string">월간 직원 월급 계산 메뉴</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">월간 직원 월급 계산 메뉴 클릭</XPD:ATTR>
 <XPD:REF name="Namespace">iT5MTKC7iUim74+JJoL0wQAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">WfQCMFvwp0GumtnPpytYfAAA</XPD:REF>
@@ -1130,7 +1130,7 @@
 <XPD:REF name="Extends[1]">OBO5kdM+YUe2+65U7VT02QAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[7]" type="UMLUseCase" guid="VudWOKpqJkKsHkXzal1u7wAA">
-<XPD:ATTR name="Name" type="string">년간 가게 세금 계산 메뉴</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">년간 가게 세금 계산 메뉴 클릭</XPD:ATTR>
 <XPD:REF name="Namespace">iT5MTKC7iUim74+JJoL0wQAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">VTBicwZaGEiuQtoB5petygAA</XPD:REF>
